@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ÖABT 2026 Zirve AI · Okul Öncesi</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+  :root { --primary:#4338ca; --primary-light:#6366f1; --secondary:#ec4899; --bg:#f8fafc; --text:#0f172a; --muted:#64748b; }
+
+  * { box-sizing:border-box; }
+  body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); -webkit-tap-highlight-color:transparent; padding-bottom:env(safe-area-inset-bottom); overflow-x:hidden; margin:0; }
+
+  /* Header */
+  header { background:linear-gradient(135deg,#0f172a 0%,#312e81 100%); color:#fff; padding:max(2.2rem,env(safe-area-inset-top)) 1.3rem 1.8rem; text-align:center; border-bottom-left-radius:2.2rem; border-bottom-right-radius:2.2rem; box-shadow:0 10px 30px rgba(49,46,129,0.5); position:relative; overflow:hidden; }
+  header::after { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(circle,rgba(255,255,255,0.05) 0%,transparent 60%); animation:rotate 20s linear infinite; pointer-events:none; }
+  @keyframes rotate { 100% { transform:rotate(360deg); } }
+  .badge-ai { background:linear-gradient(90deg,#f59e0b,#ef4444); color:#fff; font-weight:900; font-size:0.75rem; padding:0.45rem 1.1rem; border-radius:2rem; text-transform:uppercase; letter-spacing:1px; display:inline-block; margin-bottom:0.7rem; box-shadow:0 4px 15px rgba(239,68,68,0.5); animation:pulse 2s infinite; }
+  @keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(239,68,68,0.7); } 70% { box-shadow:0 0 0 12px rgba(239,68,68,0); } 100% { box-shadow:0 0 0 0 rgba(239,68,68,0); } }
+
+  /* Settings FAB */
+  .settings-fab { position:absolute; top:max(1.2rem,env(safe-area-inset-top)); right:1.1rem; z-index:60; width:2.8rem; height:2.8rem; border-radius:50%; background:rgba(255,255,255,0.14); border:1.5px solid rgba(255,255,255,0.3); color:#fff; font-size:1.15rem; display:flex; align-items:center; justify-content:center; cursor:pointer; backdrop-filter:blur(6px); transition:.25s; }
+  .settings-fab:hover { transform:rotate(45deg); background:rgba(255,255,255,0.28); }
+  .status-dot { position:absolute; top:-2px; right:-2px; width:0.85rem; height:0.85rem; border-radius:50%; border:2px solid #1e1b4b; background:#ef4444; }
+  .status-dot.ok { background:#22c55e; }
+
+  /* Settings modal */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.65); backdrop-filter:blur(4px); z-index:100; padding:1rem; align-items:flex-start; justify-content:center; overflow-y:auto; }
+  .modal-overlay.open { display:flex; animation:fadeUp .3s ease; }
+  .modal { background:#fff; border-radius:1.8rem; width:100%; max-width:460px; margin-top:3rem; padding:1.6rem; box-shadow:0 25px 60px rgba(0,0,0,0.4); border:1px solid #e2e8f0; }
+  .modal h2 { font-size:1.35rem; font-weight:900; color:var(--primary); margin:0 0 0.3rem; display:flex; align-items:center; gap:.5rem; }
+  .modal label { display:block; font-weight:800; font-size:0.85rem; color:#334155; margin:1.1rem 0 0.4rem; }
+  .modal input, .modal select { width:100%; padding:0.85rem 1rem; border:2px solid #e2e8f0; border-radius:1rem; font-family:inherit; font-weight:700; font-size:0.95rem; color:#0f172a; background:#f8fafc; transition:.2s; }
+  .modal input:focus, .modal select:focus { outline:none; border-color:var(--primary-light); background:#fff; }
+  .hint { font-size:0.72rem; color:var(--muted); font-weight:700; margin-top:0.35rem; line-height:1.4; }
+  .hint a { color:var(--primary); text-decoration:underline; }
+  .modal-btns { display:flex; gap:0.6rem; margin-top:1.4rem; }
+  .m-btn { flex:1; padding:0.9rem; border-radius:1rem; font-weight:900; font-size:0.9rem; border:none; cursor:pointer; transition:.2s; }
+  .m-btn:active { transform:scale(0.96); }
+  .m-btn.save { background:var(--primary); color:#fff; box-shadow:0 6px 18px rgba(67,56,202,0.4); }
+  .m-btn.test { background:#ecfdf5; color:#059669; border:2px solid #6ee7b7; }
+  .m-btn.close { background:#f1f5f9; color:#475569; }
+  #test-result { margin-top:1rem; font-weight:800; font-size:0.85rem; padding:0.8rem 1rem; border-radius:0.9rem; display:none; }
+
+  /* Navigation */
+  nav { position:sticky; top:0; z-index:50; background:rgba(248,250,252,0.96); backdrop-filter:blur(15px); display:flex; padding:0.75rem 0.6rem; gap:0.5rem; box-shadow:0 4px 15px -3px rgba(0,0,0,0.08); overflow-x:auto; -ms-overflow-style:none; scrollbar-width:none; }
+  nav::-webkit-scrollbar { display:none; }
+  .nav-btn { flex:1 0 auto; min-width:78px; padding:0.6rem 0.55rem; border-radius:1rem; font-weight:800; font-size:0.72rem; color:var(--muted); background:#fff; border:2px solid transparent; transition:all .3s ease; box-shadow:0 2px 5px rgba(0,0,0,0.03); display:flex; flex-direction:column; align-items:center; gap:0.3rem; cursor:pointer; }
+  .nav-btn i { font-size:1.15rem; }
+  .nav-btn.active { background:var(--primary); color:#fff; border-color:var(--primary-light); transform:translateY(-3px); box-shadow:0 8px 20px rgba(67,56,202,0.4); }
+
+  /* Sections */
+  .section { display:none; padding:1.3rem 1rem 6rem; max-width:820px; margin:0 auto; animation:fadeUp .4s ease forwards; }
+  .section.active { display:block; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+
+  /* Accordions */
+  .topic-card { background:#fff; border-radius:1.4rem; margin-bottom:1.3rem; box-shadow:0 6px 20px rgba(0,0,0,0.04); border:1px solid #e2e8f0; overflow:hidden; transition:all .3s ease; }
+  .topic-card.open { border-color:var(--primary-light); box-shadow:0 12px 30px rgba(67,56,202,0.15); }
+  .topic-head { padding:1.1rem; display:flex; align-items:center; gap:0.9rem; cursor:pointer; background:#fff; }
+  .t-icon { width:3.2rem; height:3.2rem; border-radius:0.9rem; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; background:linear-gradient(135deg,#f1f5f9,#e2e8f0); }
+  .t-title { flex:1; font-weight:900; font-size:1.02rem; color:var(--text); line-height:1.3; }
+  .t-chevron { color:var(--muted); transition:transform .4s ease; font-size:1.2rem; }
+  .topic-card.open .t-chevron { transform:rotate(180deg); color:var(--primary); }
+  .topic-body { display:none; padding:0 1.1rem 1.4rem; border-top:1px solid #f1f5f9; }
+  .topic-card.open .topic-body { display:block; animation:fadeUp .4s ease forwards; }
+
+  /* Typography */
+  .content-html { font-size:1rem; line-height:1.75; color:#334155; }
+  .content-html h4 { color:var(--primary); font-size:1.15rem; font-weight:900; margin:1.6rem 0 0.9rem; padding-bottom:0.4rem; border-bottom:2px dashed #c7d2fe; display:flex; align-items:center; gap:0.55rem; }
+  .content-html h5 { color:#be185d; font-size:1rem; font-weight:900; margin:1.2rem 0 0.5rem; }
+  .content-html p { margin-bottom:1rem; }
+  .content-html ul { list-style:none; padding-left:0; margin-bottom:1.3rem; }
+  .content-html li { position:relative; margin-bottom:0.7rem; background:#f8fafc; padding:0.75rem 0.8rem 0.75rem 2.1rem; border-radius:0.75rem; border-left:4px solid #818cf8; }
+  .content-html li::before { content:'🎯'; position:absolute; left:0.55rem; top:0.8rem; font-size:0.85rem; }
+  .content-html ol { padding-left:1.3rem; margin-bottom:1.3rem; }
+  .content-html ol li { background:#eef2ff; border-left:4px solid #a5b4fc; padding-left:0.8rem; }
+  .content-html ol li::before { content:''; }
+  .content-html table { width:100%; border-collapse:collapse; margin:1rem 0 1.4rem; font-size:0.88rem; border-radius:0.8rem; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,0.05); }
+  .content-html th { background:var(--primary); color:#fff; padding:0.6rem; font-weight:900; text-align:left; }
+  .content-html td { padding:0.6rem; border-bottom:1px solid #e2e8f0; background:#fff; font-weight:600; }
+  .content-html tr:nth-child(even) td { background:#f8fafc; }
+
+  .osym-alert { display:block; background:#fee2e2; border-left:5px solid #ef4444; color:#991b1b; padding:1.1rem; border-radius:0 1rem 1rem 0; font-weight:800; margin:1.3rem 0; font-size:0.92rem; box-shadow:0 4px 10px rgba(239,68,68,0.1); }
+  .tip-box { display:block; background:#ecfdf5; border-left:5px solid #10b981; color:#065f46; padding:1.1rem; border-radius:0 1rem 1rem 0; font-weight:700; margin:1.3rem 0; font-size:0.92rem; }
+  .baris-soru { display:block; background:linear-gradient(135deg,#fffbeb,#fef3c7); border:3px solid #f59e0b; padding:1.3rem; border-radius:1.1rem; margin:1.8rem 0; box-shadow:0 8px 25px rgba(245,158,11,0.2); }
+
+  .highlight-yellow { background:linear-gradient(120deg,#fef08a,#fef08a); background-repeat:no-repeat; background-size:100% 40%; background-position:0 88%; font-weight:900; color:#1f2937; padding:0 4px; }
+  .highlight-pink { background:linear-gradient(120deg,#fbcfe8,#fbcfe8); background-repeat:no-repeat; background-size:100% 40%; background-position:0 88%; font-weight:900; color:#831843; padding:0 4px; }
+  .highlight-blue { background:linear-gradient(120deg,#bfdbfe,#bfdbfe); background-repeat:no-repeat; background-size:100% 40%; background-position:0 88%; font-weight:900; color:#1e3a8a; padding:0 4px; }
+
+  /* Buttons */
+  .action-btn { display:block; width:100%; padding:1.1rem; border-radius:1.1rem; font-weight:900; font-size:1rem; border:none; cursor:pointer; transition:all .2s ease; text-align:center; }
+  .btn-quiz { background:linear-gradient(135deg,#3b82f6,#4f46e5); color:#fff; margin-top:1.3rem; box-shadow:0 6px 20px rgba(67,56,202,0.4); border:2px solid #818cf8; }
+  .btn-exam { background:linear-gradient(135deg,#ec4899,#e11d48); color:#fff; font-size:1.2rem; padding:1.4rem; border-radius:999px; box-shadow:0 8px 30px rgba(225,29,72,0.5); margin-top:1rem; display:flex; align-items:center; justify-content:center; gap:0.7rem; border:3px solid #f472b6; }
+  .action-btn:active { transform:scale(0.96); }
+  .action-btn:disabled { opacity:0.7; cursor:not-allowed; transform:none; }
+
+  /* Big static exam card */
+  .big-card { background:#fff; border-radius:2rem; padding:2rem 1.6rem; box-shadow:0 12px 35px rgba(0,0,0,0.06); border:1px solid #e2e8f0; text-align:center; }
+
+  /* Exam UI */
+  .exam-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; gap:0.6rem; flex-wrap:wrap; }
+  .timer-chip { font-weight:900; font-size:0.95rem; color:#be123c; background:#fff1f2; padding:0.5rem 1rem; border-radius:999px; border:2px solid #fecdd3; display:none; align-items:center; gap:0.4rem; }
+  .timer-chip.warn { color:#fff; background:#e11d48; border-color:#fb7185; animation:pulse 1s infinite; }
+  .progress-bg { background:#e2e8f0; height:11px; border-radius:6px; overflow:hidden; margin-bottom:1.6rem; box-shadow:inset 0 2px 4px rgba(0,0,0,0.1); }
+  .progress-fill { background:linear-gradient(90deg,#4f46e5,#ec4899); height:100%; border-radius:6px; transition:width .5s cubic-bezier(0.4,0,0.2,1); }
+
+  .q-card { background:#fff; padding:1.6rem; border-radius:1.4rem; box-shadow:0 12px 35px rgba(0,0,0,0.06); margin-bottom:1.3rem; border:1px solid #e2e8f0; }
+  .q-text { font-size:1.1rem; font-weight:800; color:#0f172a; line-height:1.6; margin-bottom:1.6rem; }
+  .opt-btn { width:100%; display:flex; align-items:flex-start; gap:0.9rem; padding:1.05rem; background:#f8fafc; border:2px solid #e2e8f0; border-radius:1.1rem; margin-bottom:0.85rem; text-align:left; transition:all .2s; cursor:pointer; }
+  .opt-btn:hover:not(:disabled) { border-color:var(--primary-light); background:#eef2ff; transform:translateX(4px); }
+  .opt-letter { width:30px; height:30px; border-radius:50%; background:#e2e8f0; color:#475569; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:0.9rem; flex-shrink:0; margin-top:0.1rem; transition:all .2s; }
+  .opt-text { font-size:1rem; font-weight:700; color:#334155; line-height:1.4; white-space:normal; }
+  .opt-btn.correct { background:#ecfdf5; border-color:#10b981; box-shadow:0 4px 15px rgba(16,185,129,0.2); }
+  .opt-btn.correct .opt-letter { background:#10b981; color:#fff; }
+  .opt-btn.wrong { background:#fef2f2; border-color:#ef4444; box-shadow:0 4px 15px rgba(239,68,68,0.2); }
+  .opt-btn.wrong .opt-letter { background:#ef4444; color:#fff; }
+
+  .explanation { display:none; background:#f0fdf4; border:2px solid #38bdf8; padding:1.3rem; border-radius:1.1rem; margin-top:1.6rem; font-size:0.98rem; font-weight:700; color:#075985; line-height:1.6; animation:fadeUp .5s; }
+
+  .btn-deep-dive { display:none; background:linear-gradient(135deg,#f59e0b,#ea580c); color:#fff; width:100%; padding:1.1rem; border-radius:1rem; font-weight:900; font-size:1rem; margin-top:1rem; cursor:pointer; transition:.2s; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 15px rgba(234,88,12,0.3); border:2px solid #fef3c7; }
+  .btn-deep-dive:hover:not(:disabled) { transform:translateY(-3px); }
+  .btn-deep-dive:active { transform:scale(0.97); }
+  .deep-dive-content { display:none; background:#fff; border:3px solid #f59e0b; border-radius:1rem; padding:1.3rem; margin-top:1rem; font-size:0.98rem; font-weight:600; color:#451a03; line-height:1.7; }
+  .deep-dive-content h3, .deep-dive-content h4 { color:#d97706; font-weight:900; margin:0.9rem 0 0.4rem; font-size:1.1rem; }
+  .deep-dive-content ul { padding-left:1.3rem; margin-bottom:0.9rem; list-style:disc; }
+  .deep-dive-content li { margin-bottom:0.4rem; }
+
+  #error-box { display:none; background:#fee2e2; border:2px solid #ef4444; color:#991b1b; padding:1.3rem; border-radius:1rem; margin-top:1.3rem; text-align:left; font-weight:700; }
+
+  .btn-ai-coach { background:linear-gradient(135deg,#10b981,#059669); color:#fff; padding:1.1rem; border-radius:1.1rem; font-weight:900; font-size:1.05rem; width:100%; margin-bottom:1.3rem; border:none; cursor:pointer; transition:all .2s; box-shadow:0 8px 25px rgba(16,185,129,0.3); }
+  .btn-ai-coach:active { transform:scale(0.97); }
+  .coach-content { display:none; background:#f0fdf4; border:2px dashed #34d399; padding:1.3rem; border-radius:1.1rem; margin-bottom:1.3rem; font-size:0.95rem; font-weight:700; color:#064e3b; line-height:1.7; text-align:left; }
+
+  .ai-loader { display:none; flex-direction:column; align-items:center; justify-content:center; height:55vh; text-align:center; }
+  .loader-progress { width:80%; background:#e2e8f0; height:12px; border-radius:6px; margin:1.5rem 0; overflow:hidden; box-shadow:inset 0 2px 4px rgba(0,0,0,0.1); }
+  .loader-bar { height:100%; background:linear-gradient(90deg,#f59e0b,#ef4444); width:0%; transition:width .3s linear; }
+
+  .score-circle { width:170px; height:170px; border-radius:50%; background:conic-gradient(var(--primary) var(--pct,0%),#e2e8f0 0); display:flex; align-items:center; justify-content:center; margin:0 auto 1.8rem; box-shadow:0 10px 30px rgba(67,56,202,0.3); }
+  .score-inner { width:132px; height:132px; border-radius:50%; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:inset 0 4px 15px rgba(0,0,0,0.1); }
+
+  .review-item { text-align:left; background:#fff; border:1px solid #e2e8f0; border-radius:1rem; padding:1rem; margin-bottom:0.8rem; }
+  .review-item.wrong { border-left:5px solid #ef4444; }
+  .review-item.empty { border-left:5px solid #94a3b8; }
+  .review-q { font-weight:800; font-size:0.9rem; color:#0f172a; margin-bottom:0.5rem; }
+  .review-a { font-size:0.82rem; font-weight:700; margin:0.15rem 0; }
+
+  /* === ÖABT EK STİLLER === */
+  .cat-header { display:flex; align-items:center; gap:.7rem; margin:1.8rem 0 .9rem; padding:.9rem 1.1rem; border-radius:1.2rem; color:#fff; font-weight:900; box-shadow:0 8px 20px rgba(0,0,0,.12); }
+  .cat-header .cat-emoji { font-size:1.5rem; }
+  .cat-header .cat-name { flex:1; font-size:1rem; line-height:1.2; }
+  .cat-header .cat-count { background:rgba(255,255,255,.22); border:1.5px solid rgba(255,255,255,.35); padding:.3rem .7rem; border-radius:2rem; font-size:.7rem; white-space:nowrap; }
+
+  /* Sohbet (canlı özel ders) */
+  .chat-wrap { margin-top:1rem; border:2px solid #c7d2fe; border-radius:1.4rem; overflow:hidden; background:#fff; display:none; }
+  .chat-head { background:linear-gradient(135deg,#4338ca,#6366f1); color:#fff; padding:.75rem 1rem; font-weight:900; font-size:.85rem; display:flex; align-items:center; justify-content:space-between; }
+  .chat-live { display:flex; align-items:center; gap:.35rem; font-size:.68rem; background:rgba(255,255,255,.18); padding:.2rem .6rem; border-radius:2rem; }
+  .chat-live::before { content:''; width:.5rem; height:.5rem; border-radius:50%; background:#4ade80; animation:pulse 2s infinite; }
+  .chat-log { max-height:340px; overflow-y:auto; padding:.9rem; background:#f8fafc; display:flex; flex-direction:column; gap:.7rem; }
+  .bubble { max-width:88%; padding:.7rem .9rem; border-radius:1.1rem; font-size:.85rem; font-weight:700; line-height:1.55; }
+  .bubble.ai { background:#fff; border:1.5px solid #e2e8f0; border-bottom-left-radius:.3rem; align-self:flex-start; color:#0f172a; }
+  .bubble.me { background:var(--primary); color:#fff; border-bottom-right-radius:.3rem; align-self:flex-end; }
+  .bubble b { color:inherit; }
+  .bubble.ai ul { margin:.4rem 0 .2rem 1.1rem; padding:0; }
+  .chat-sugg { display:flex; gap:.4rem; flex-wrap:wrap; padding:.6rem .9rem 0; background:#f8fafc; }
+  .chat-sugg button { background:#eef2ff; border:1.5px solid #c7d2fe; color:#4338ca; font-weight:800; font-size:.7rem; padding:.35rem .7rem; border-radius:2rem; cursor:pointer; }
+  .chat-sugg button:active { transform:scale(.95); }
+  .chat-input-row { display:flex; gap:.5rem; padding:.7rem; background:#f8fafc; border-top:1.5px solid #e2e8f0; }
+  .chat-input-row input { flex:1; padding:.75rem .9rem; border:2px solid #e2e8f0; border-radius:2rem; font-family:inherit; font-weight:700; font-size:.85rem; background:#fff; }
+  .chat-input-row input:focus { outline:none; border-color:var(--primary-light); }
+  .chat-send { width:2.8rem; height:2.8rem; flex:0 0 auto; border:none; border-radius:50%; background:var(--primary); color:#fff; font-size:.95rem; cursor:pointer; }
+  .chat-send:disabled { opacity:.5; }
+  .typing span { display:inline-block; width:.4rem; height:.4rem; margin-right:.2rem; border-radius:50%; background:#94a3b8; animation:blink 1.4s infinite both; }
+  .typing span:nth-child(2){ animation-delay:.2s; } .typing span:nth-child(3){ animation-delay:.4s; }
+  @keyframes blink { 0%,80%,100%{ opacity:.2; } 40%{ opacity:1; } }
+
+  /* Ders bazlı analiz çubukları */
+  .subj-row { display:flex; align-items:center; gap:.6rem; margin-bottom:.55rem; }
+  .subj-name { width:38%; font-size:.72rem; font-weight:900; color:#334155; text-align:left; }
+  .subj-bar { flex:1; height:.65rem; background:#e2e8f0; border-radius:2rem; overflow:hidden; }
+  .subj-fill { height:100%; border-radius:2rem; transition:width .8s ease; }
+  .subj-val { width:3.2rem; font-size:.7rem; font-weight:900; color:#475569; text-align:right; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <button class="settings-fab" onclick="openSettings()" aria-label="Ayarlar"><i class="fas fa-cog"></i><span id="status-dot" class="status-dot"></span></button>
+  <div class="badge-ai"><i class="fas fa-bolt mr-1"></i> ÖABT Okul Öncesi · ÖSYM Zorluk Modu</div>
+  <h1 class="text-2xl font-black mb-1 tracking-tight">ÖABT 2026 ZİRVE</h1>
+  <p class="text-[0.82rem] font-bold text-indigo-200">50 Soru · 75 Dakika · Hedef: 50/50</p>
+</header>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <h2><i class="fas fa-sliders-h"></i> Yapay Zeka Ayarları</h2>
+    <p class="hint">AI özellikleri (soru üretme, özel ders, koç) çalışması için kendi API anahtarını gir. Anahtar yalnızca senin tarayıcında saklanır, hiçbir yere gönderilmez.</p>
+
+    <label for="set-provider">Sağlayıcı</label>
+    <select id="set-provider" onchange="onProviderChange()">
+      <option value="gemini">Google Gemini (ücretsiz kota mevcut)</option>
+      <option value="openai">OpenAI (ChatGPT / GPT)</option>
+    </select>
+
+    <label for="set-key">API Anahtarları <span style="font-weight:700; color:#64748b">(her satıra bir anahtar)</span></label>
+    <textarea id="set-key" rows="4" placeholder="AIza...birinci anahtar&#10;AIza...ikinci anahtar&#10;AIza...üçüncü anahtar" autocomplete="off" spellcheck="false" style="width:100%; padding:.8rem; border:2px solid #e2e8f0; border-radius:.9rem; font-family:monospace; font-size:.75rem; font-weight:700; resize:vertical;"></textarea>
+    <div class="hint" id="key-hint">Gemini anahtarını buradan ücretsiz al: <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a></div>
+    <div class="hint" style="background:#fffbeb; border:1.5px solid #fcd34d; border-radius:.7rem; padding:.55rem .7rem; margin-top:.45rem; color:#92400e;">
+      <b>⚠️ Önemli:</b> Google'da kota <b>anahtar başına değil, proje başına</b>dır. Aynı projede oluşturulmuş anahtarlar <b>aynı kotayı paylaşır</b> — birden fazlası işe yaramaz. Ancak <b>ayrı projelerde</b> oluşturduysan her birinin kendi kotası olur. Uygulama bunu test edip sana söyleyecek.
+    </div>
+    <div id="key-status" style="margin-top:.5rem;"></div>
+
+    <label for="set-model">Model</label>
+    <input type="text" id="set-model" list="model-list" placeholder="gemini-2.5-flash">
+    <datalist id="model-list"></datalist>
+    <div class="hint">Modeli elle yazabilir ya da listeden seçebilirsin. Bilmiyorsan varsayılanı bırak.<br><b>Kota doluyorsa</b> <code>gemini-2.5-flash-lite</code> dene — dakika ve gün limiti daha yüksektir.</div>
+
+    <label for="set-rpm">Hız Sınırı (dakikada istek)</label>
+    <input type="number" id="set-rpm" min="1" max="60" placeholder="8">
+    <div class="hint">Ücretsiz kotada Gemini Flash yaklaşık <b>10-15 istek/dakika</b> kabul eder. Uygulama istekleri kuyruğa dizip bu sınırı aşmaz. <b>Sürekli "kota doldu" alıyorsan bu sayıyı düşür</b> (örn. 5). Sabırlıysan yavaş ama hatasız çalışır.</div>
+
+    <div id="test-result"></div>
+
+    <div class="modal-btns">
+      <button class="m-btn test" onclick="testConnection()"><i class="fas fa-plug mr-1"></i> Test Et</button>
+      <button class="m-btn save" onclick="saveSettings()"><i class="fas fa-check mr-1"></i> Kaydet</button>
+    </div>
+    <button class="m-btn close" style="width:100%; margin-top:0.6rem;" onclick="closeSettings()">Kapat</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <button id="nav-konu" class="nav-btn active" onclick="switchView('konu')"><i class="fas fa-book-reader"></i> Konular</button>
+  <button id="nav-tahmin" class="nav-btn" onclick="switchView('tahmin')"><i class="fas fa-bullseye"></i> 2026 Tahmin</button>
+  <button id="nav-kesin" class="nav-btn" onclick="switchView('kesin')"><i class="fas fa-award"></i> 50'lik Deneme</button>
+  <button id="nav-deneme" class="nav-btn" onclick="switchView('deneme')"><i class="fas fa-robot"></i> AI Deneme</button>
+  <button id="nav-hata" class="nav-btn" onclick="switchView('hata')"><i class="fas fa-book-medical"></i> Hata Defteri</button>
+</nav>
+
+<!-- 1. KONULAR -->
+<div id="view-konu" class="section active">
+  <div class="bg-gradient-to-r from-blue-700 to-indigo-800 p-5 rounded-3xl mb-7 shadow-xl text-white border-4 border-indigo-400 relative overflow-hidden">
+    <div class="absolute top-0 right-0 opacity-10 text-8xl transform translate-x-4 -translate-y-4"><i class="fas fa-graduation-cap"></i></div>
+    <h3 class="font-black text-xl mb-2 relative z-10"><i class="fas fa-crown text-yellow-400 mr-2"></i> Hedef: 50'de 50!</h3>
+    <p class="text-sm font-bold leading-relaxed opacity-95 relative z-10">Okul Öncesi ÖABT'nin <b>15 konusunun tamamı</b>, derinleştirilmiş uzun anlatımla burada. Yanlış yaptığın soruda <span class="bg-yellow-500 text-yellow-900 px-2 py-0.5 rounded">🧠 AI Özel Ders</span>'i aç, sonra <span class="bg-emerald-400 text-emerald-900 px-2 py-0.5 rounded">💬 canlı sohbetle</span> hocaya istediğini sor.</p>
+    <button class="w-full mt-3 bg-yellow-400 text-yellow-900 font-black py-2.5 rounded-xl shadow-lg hover:bg-yellow-300 transition-all border-2 border-yellow-200 text-sm" onclick="getFourteenDayPlan()">
+      🔥 SINAVA KALAN GÜNLER İÇİN AI EYLEM PLANI
+    </button>
+    <div id="fourteen-day-plan" class="hidden mt-4 bg-white text-indigo-900 p-4 rounded-xl text-sm font-semibold text-left"></div>
+  </div>
+  <div id="topics-container"></div>
+</div>
+
+<!-- 2. 2026 TAHMİN TESTİ -->
+<div id="view-tahmin" class="section">
+  <div class="big-card">
+    <div class="text-7xl mb-4">🎯</div>
+    <h2 class="text-2xl font-black text-gray-800 mb-3">2026 Banko Tahmin Testi</h2>
+    <p class="text-gray-600 font-bold mb-6 text-[0.92rem] leading-relaxed">ÖSYM'nin son yıllardaki soru trendine göre elle hazırlanmış, <b>çıkma ihtimali en yüksek</b> <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-lg">seçme sorular</span>. Süre yok, dilediğin gibi analiz et. Bu sorular sabittir, AI değildir.</p>
+    <button class="action-btn btn-exam" style="background:linear-gradient(135deg,#f59e0b,#ea580c); border-color:#fcd34d;" onclick="startStaticQuiz(PREDICT_2026,'2026 TAHMİN', false)">
+      <i class="fas fa-play"></i> Tahmin Testini Başlat
+    </button>
+    <p class="text-xs text-gray-400 font-bold mt-4" id="tahmin-count"></p>
+  </div>
+</div>
+
+<!-- 3. KESİN 50'LİK DENEME -->
+<div id="view-kesin" class="section">
+  <div class="big-card">
+    <div class="text-7xl mb-4">🏆</div>
+    <h2 class="text-2xl font-black text-gray-800 mb-3">50'lik Zirve Denemesi</h2>
+    <p class="text-gray-600 font-bold mb-4 text-[0.92rem] leading-relaxed">Gerçek ÖABT konu ağırlığıyla elle hazırlanmış, <b>sabit 50 soruluk tam deneme</b>. Sınav gerçekçiliği için <b>75 dakikalık geri sayım</b> çalışır. Bittiğinde net, konu konu analiz ve yanlış inceleme ekranı gelir.</p>
+    <div class="bg-indigo-50 border-2 border-indigo-100 rounded-2xl p-4 mb-5 text-left">
+      <p class="text-xs font-black text-indigo-800 mb-1"><i class="fas fa-info-circle mr-1"></i> Kurallar</p>
+      <p class="text-xs font-bold text-indigo-700 leading-relaxed">• Gelişim 8 · Oyun 4 · Program 4 · Kuramlar 4 · Okuryazarlık 4 · Ruh Sağlığı 4<br>• Fen 3 · Matematik 3 · Sağlık 3 · Anne-Baba 3 · Sanat 2 · Müzik 2 · Drama 2 · Edebiyat 2 · Haklar 2<br>• Her doğru +1, her 4 yanlış 1 doğruyu götürür (−0,25)<br>• 75 dakika · süre bitince otomatik biter</p>
+    </div>
+    <button class="action-btn btn-exam" onclick="startStaticQuiz(EXAM_50,'ZİRVE 50 DENEME', true)">
+      <i class="fas fa-stopwatch"></i> 50'lik Denemeyi Başlat
+    </button>
+    <p class="text-xs text-gray-400 font-bold mt-4" id="kesin-count"></p>
+  </div>
+</div>
+
+<!-- 4. AI DENEME -->
+<div id="view-deneme" class="section">
+  <div class="big-card" id="deneme-intro">
+    <div class="text-7xl mb-5 drop-shadow-xl animate-bounce">🧠</div>
+    <h2 class="text-2xl font-black text-gray-800 mb-3 tracking-tight">Sınırsız AI Simülatörü</h2>
+    <p class="text-gray-600 font-bold mb-6 text-[0.92rem] leading-relaxed">Kendi API anahtarınla, her seferinde <b>yepyeni 50 soru</b> üretilir. Gerçek ÖABT dağılımına uygun, vaka ve analiz temelli, ÖSYM zorluğunda. <span class="bg-pink-100 text-pink-700 px-2 py-0.5 rounded-lg">Tükenmez soru bankası</span>.</p>
+    <button class="action-btn btn-exam" onclick="generateAIExam()">
+      <i class="fas fa-bolt text-yellow-300"></i> AI ile 50 Soru Üret
+    </button>
+    <div id="error-box"></div>
+    <div id="key-toast" style="display:none; background:#fffbeb; border:2px solid #fcd34d; color:#92400e; font-weight:800; font-size:.78rem; border-radius:1rem; padding:.7rem .9rem; margin-bottom:1rem;"></div>
+  </div>
+  <div id="ai-loading" class="ai-loader mt-8">
+    <i class="fas fa-cog fa-spin text-6xl text-indigo-500 mb-4"></i>
+    <h3 class="font-black text-2xl text-indigo-900 mb-3">Sorular Yazılıyor...</h3>
+    <p class="text-md font-bold text-gray-600 mb-4" id="ai-status-text">ÖSYM zorluk derecesi ayarlanıyor.</p>
+    <div class="loader-progress"><div class="loader-bar" id="ai-progress-bar"></div></div>
+    <div class="bg-indigo-50 border-l-4 border-indigo-400 p-4 rounded-r-xl max-w-sm">
+      <p class="text-xs text-indigo-800 font-black">Sistem donmamak için birden çok isteği paralel çalıştırır. Birkaç saniye sürebilir.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- 5. HATA DEFTERİ -->
+<div id="view-hata" class="section">
+  <div class="bg-gradient-to-r from-rose-600 to-red-700 p-5 rounded-3xl mb-6 shadow-xl text-white border-4 border-rose-300">
+    <h3 class="font-black text-xl mb-2"><i class="fas fa-book-medical mr-2"></i> Hata Defterim</h3>
+    <p class="text-sm font-bold leading-relaxed opacity-95">Yanlış yaptığın her soru buraya otomatik düşer. Netini asıl yükseltecek şey burası: <b>aynı hatayı iki kez yapmamak</b>. Biriken sorulardan tek tuşla yeni bir test çöz.</p>
+  </div>
+  <div class="flex gap-2.5 mb-3">
+    <button class="action-btn" style="background:linear-gradient(135deg,#e11d48,#9f1239); color:#fff; flex:2;" onclick="startMistakeQuiz()"><i class="fas fa-redo mr-1"></i> Hatalarımdan Test Çöz</button>
+    <button class="action-btn" style="background:#f1f5f9; color:#475569; border:2px solid #e2e8f0; flex:1;" onclick="clearMistakes()"><i class="fas fa-trash"></i></button>
+  </div>
+  <div class="flex gap-2.5 mb-5">
+    <button class="action-btn" id="btn-diagnose-all" style="background:linear-gradient(135deg,#7c3aed,#4c1d95); color:#fff; flex:2;" onclick="diagnoseAll()"><i class="fas fa-stethoscope mr-1"></i> Tüm Hatalarımın Röntgenini Çek</button>
+    <button class="action-btn" style="background:#ecfdf5; color:#047857; border:2px solid #6ee7b7; flex:1;" onclick="exportMistakesHTML()"><i class="fas fa-download mr-1"></i> HTML İndir</button>
+  </div>
+  <div id="diag-status" style="display:none;" class="bg-violet-50 border-2 border-violet-200 text-violet-800 font-black text-xs rounded-2xl p-3 mb-4 text-center"></div>
+  <div id="hata-list"></div>
+</div>
+
+<!-- QUIZ -->
+<div id="view-quiz" class="section">
+  <div class="exam-header">
+    <div class="font-black text-lg text-indigo-800 bg-indigo-50 px-4 py-2 rounded-full border-2 border-indigo-100 shadow-sm" id="q-counter">Soru 1/50</div>
+    <div class="timer-chip" id="timer-chip"><i class="fas fa-clock"></i> <span id="timer-text">75:00</span></div>
+    <div class="font-black text-xs text-pink-600 uppercase tracking-widest bg-pink-50 px-3 py-2 rounded-full border border-pink-100" id="q-topic-name">Konu</div>
+  </div>
+  <div class="progress-bg"><div class="progress-fill" id="progress-bar" style="width:2%;"></div></div>
+  <div class="q-card">
+    <div class="q-text" id="q-text">Yükleniyor...</div>
+    <div id="q-options"></div>
+    <div class="explanation" id="q-exp"></div>
+    <button id="btn-deep-dive" class="btn-deep-dive" onclick="getDeepDiveAI()">
+      <i class="fas fa-chalkboard-teacher text-xl"></i> Anlamadım — AI'dan Özel Ders Al
+    </button>
+    <div id="deep-dive-content" class="deep-dive-content"></div>
+
+    <div id="chat-wrap" class="chat-wrap">
+      <div class="chat-head">
+        <span><i class="fas fa-comments mr-1"></i> Hoca ile Canlı Sohbet</span>
+        <span class="chat-live">Bağlı</span>
+      </div>
+      <div class="chat-log" id="chat-log"></div>
+      <div class="chat-sugg" id="chat-sugg"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Aklına takılanı sor... (örn: 'Tanzimat'ı biraz daha açar mısın?')" onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="chat-send" id="chat-send" onclick="sendChat()"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+
+  </div>
+  <div class="flex gap-2.5 mt-6">
+    <button class="action-btn" style="background:#f1f5f9; color:#475569; border:2px solid #e2e8f0; flex:0 0 auto;" onclick="changeQ(-1)"><i class="fas fa-arrow-left"></i></button>
+    <button class="action-btn" style="background:#fff; color:#ef4444; border:2px solid #ef4444; flex:1;" onclick="finishQuiz()"><i class="fas fa-stop mr-1"></i> Bitir</button>
+    <button class="action-btn" style="background:var(--primary); color:#fff; flex:2; box-shadow:0 4px 15px rgba(67,56,202,0.4);" id="btn-next" onclick="changeQ(1)">İleri <i class="fas fa-arrow-right ml-1"></i></button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="view-result" class="section">
+  <div class="bg-white rounded-[2rem] p-7 shadow-2xl text-center border-t-8 border-indigo-600">
+    <h2 class="text-2xl font-black mb-6 text-gray-800">Sınav Karnesi</h2>
+    <div class="score-circle" id="score-circle" style="--pct:0%;">
+      <div class="score-inner">
+        <span class="text-5xl font-black text-indigo-700" id="res-net" style="line-height:1;">0</span>
+        <span class="text-xs font-black text-gray-400 mt-1 tracking-widest">NET</span>
+      </div>
+    </div>
+    <div class="grid grid-cols-3 gap-3 mb-6">
+      <div class="bg-green-50 p-3 rounded-2xl border-2 border-green-100"><div class="text-2xl font-black text-green-600" id="res-d">0</div><div class="text-[10px] font-black text-green-800 uppercase">Doğru</div></div>
+      <div class="bg-red-50 p-3 rounded-2xl border-2 border-red-100"><div class="text-2xl font-black text-red-600" id="res-y">0</div><div class="text-[10px] font-black text-red-800 uppercase">Yanlış</div></div>
+      <div class="bg-gray-50 p-3 rounded-2xl border-2 border-gray-200"><div class="text-2xl font-black text-gray-500" id="res-b">0</div><div class="text-[10px] font-black text-gray-600 uppercase">Boş</div></div>
+    </div>
+    <div id="subj-analysis" class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 mb-5" style="display:none;"><p class="text-xs font-black text-slate-700 mb-3 text-left"><i class="fas fa-chart-simple mr-1"></i> DERS DERS BAŞARIN</p><div id="subj-bars"></div></div>
+    <div id="res-msg" class="p-5 rounded-2xl font-black text-base mb-6 border-2 shadow-sm"></div>
+    <button id="btn-ai-coach" class="btn-ai-coach" onclick="getAICoach()">✨ AI Koçtan Kişisel Analiz Al</button>
+    <div id="coach-content" class="coach-content"></div>
+    <button id="btn-review" class="action-btn" style="background:#fff7ed; color:#c2410c; border:2px solid #fdba74; margin-bottom:0.8rem;" onclick="toggleReview()"><i class="fas fa-search mr-1"></i> Yanlış & Boşları İncele</button>
+    <div id="review-box" style="display:none; text-align:left; margin-bottom:1rem;"></div>
+    <button id="btn-restart-quiz" class="action-btn" style="background:linear-gradient(135deg,#3b82f6,#4338ca); color:#fff; padding:1.1rem; font-size:1.05rem; box-shadow:0 8px 25px rgba(67,56,202,0.4);" onclick="handleRestartQuiz()">
+      <i class="fas fa-sync-alt mr-2"></i> Aynı Formatta Tekrar
+    </button>
+  </div>
+</div>
+
+<script>
+// ==================== ÖABT OKUL ÖNCESİ · KONU GRUPLARI ====================
+const CATS = [
+  { key:"alan",    name:"Alan Eğitimi",            emoji:"🎨", soru:12, yuzde:"24",  grad:"linear-gradient(135deg,#0ea5e9,#0369a1)" },
+  { key:"uygulama",name:"Öğrenme ve Uygulama",     emoji:"🧩", soru:18, yuzde:"36",  grad:"linear-gradient(135deg,#8b5cf6,#5b21b6)" },
+  { key:"cocuk",   name:"Çocuğu Tanıma",           emoji:"📈", soru:15, yuzde:"30",  grad:"linear-gradient(135deg,#10b981,#047857)" },
+  { key:"aile",    name:"Aile ve Haklar",          emoji:"👨‍👩‍👧", soru:5, yuzde:"10", grad:"linear-gradient(135deg,#e11d48,#9f1239)" }
+];
+
+// ==================== 15 KONU (derinleştirilmiş uzun anlatım) ====================
+const TOPICS = [
+{cat:"alan", id:"fen", icon:"🔬", title:"1. Erken Çocuklukta Fen Eğitimi", exp:`
+<h3>Erken Çocuklukta Fen Eğitimi</h3>
+<p>Okul öncesi fen eğitiminin amacı çocuğa bilgi <b>ezberletmek değil</b>; onu bir bilim insanı gibi düşünmeye, merak etmeye ve keşfetmeye yönlendirmektir. Öğretmen bilgi aktarıcı değil, <span class="highlight-yellow">rehber ve süreç kolaylaştırıcısıdır</span>. ÖSYM bu konuda neredeyse hiç tanım sormaz; <b>vaka verir</b> ve "öğretmen ne yapmalı / hangi süreç becerisi kullanılmıştır" diye sorar.</p>
+
+<h4>1) Bilimsel Süreç Becerileri — Netin Kalbi</h4>
+<p>Bu başlık ÖABT'nin en çok soru gelen alt başlıklarındandır. Her beceriyi <b>fiilinden</b> tanı:</p>
+<table>
+<tr><th>Beceri</th><th>Ne yapılır?</th><th>Vakadaki ipucu</th></tr>
+<tr><td><b>Gözlem</b></td><td>Beş duyuyla veri toplama</td><td>"İnceledi, baktı, kokladı, dinledi"</td></tr>
+<tr><td><b>Karşılaştırma</b></td><td>Benzerlik-farklılık bulma</td><td>"Hangisi daha ağır/uzun?"</td></tr>
+<tr><td><b>Sınıflandırma</b></td><td>Ortak özelliğe göre gruplama</td><td>"Yüzenler ve batanlar diye ayırdı"</td></tr>
+<tr><td><b>Ölçme</b></td><td>Standart/standart olmayan birimle</td><td>"Kaç ataç boyunda?"</td></tr>
+<tr><td><b>Tahmin (Öngörü)</b></td><td>Veriye dayalı, <b>deneyden ÖNCE</b></td><td>"Sizce ne olacak?"</td></tr>
+<tr><td><b>Çıkarım</b></td><td>Gözlemi <b>yorumlama</b>, sebep bulma</td><td>"Neden battı sizce?"</td></tr>
+<tr><td><b>İletişim</b></td><td>Bulguyu paylaşma, grafiğe dökme</td><td>"Sonucu tabloya çizdiler"</td></tr>
+<tr><td><b>Verileri kaydetme</b></td><td>Resim, çetele, fotoğraf</td><td>"Her gün boyunu işaretledi"</td></tr>
+<tr><td><b>Deney/Değişkenleri belirleme</b></td><td>Sadece bir şeyi değiştirme</td><td>"Birine su verdi, diğerine vermedi"</td></tr>
+</table>
+<div class="tip-box"><b>💡 En Kritik Ayrım — Tahmin mi Çıkarım mı?</b> Zamana bak! <b>Tahmin, olaydan ÖNCE</b> gelecekle ilgilidir ("Sence bu batacak mı?"). <b>Çıkarım, olaydan SONRA</b> nedeni açıklar ("Neden battı?"). ÖSYM bu ikisini sürekli birbirinin çeldiricisi yapar.</div>
+
+<h4>2) Fen Etkinliği Türleri</h4>
+<ul>
+<li><b>Deney:</b> Basit ve güvenli olmalı. Çocuk <b>izlemez, yapar</b>. Değişken sayısı bir olmalı.</li>
+<li><b>Gözlem gezisi:</b> Öncesinde plan/izin, sırasında serbest keşif, <b>sonrasında değerlendirme</b> şart.</li>
+<li><b>Fen ve doğa köşesi:</b> Çocuğun ulaşabileceği yükseklikte, sürekli <b>değişen/zenginleşen</b>, dokunmanın serbest olduğu bir alan.</li>
+<li><b>Doğal materyaller, koleksiyon, kavram haritası, poster, belgesel/görsel destek.</b></li>
+</ul>
+
+<h4>3) Öğretmenin Rolü</h4>
+<ul>
+<li><b>Açık uçlu soru sorar:</b> "Ne oldu?", "Neden böyle oldu sence?", "Başka nasıl deneyebiliriz?" — <b>"Evet/hayır" ile cevaplanan soru sormaz</b>.</li>
+<li><b>Hemen cevap vermez.</b> Çocuğun cevabı bulmasına fırsat tanır. Cevabı söylemek, süreci öldürür.</li>
+<li><b>Yanlış cevabı düzeltmez</b>, yeni bir deneyimle çocuğun kendi yanlışını görmesini sağlar.</li>
+<li><b>Süreci</b> değerlendirir, ürünü değil.</li>
+<li>Bilmediğinde "bilmiyorum, <b>birlikte araştıralım</b>" der. Bu, en makbul öğretmen davranışıdır.</li>
+</ul>
+<div class="osym-alert"><b>🚨 ÖSYM Tuzağı:</b> Seçeneklerde "öğretmen doğru cevabı açıkladı", "sonucu söyledi", "hatasını düzeltti" varsa <b>daima yanlıştır</b>. Doğru cevap neredeyse her zaman çocuğu <b>düşündüren, soru sorduran, tekrar denemesini sağlayan</b> seçenektir.</div>
+<div class="banko"><b>🎯 2026 BANKO TAHMİN:</b> Öğretmen suya bıraktığı cisimler için önce "Sizce hangisi batar?" diye soruyor, deneyden sonra "Neden battı sizce?" diye soruyor. Sırasıyla hangi süreç becerileri kullanılmıştır?<br><b>Cevap:</b> <b>Tahmin → Çıkarım</b>. Deneyden önce sorulan tahmindir, sonra sorulan çıkarımdır.</div>
+`},
+{cat:"alan", id:"matematik", icon:"🧮", title:"2. Erken Çocuklukta Matematik Eğitimi", exp:`
+<h3>Erken Çocuklukta Matematik Eğitimi</h3>
+<p>Okul öncesinde matematik <b>işlem yapmak değil</b>, matematiksel düşünmeyi kurmaktır. Somut yaşantı olmadan sembol verilmez. Sıra daima: <b>somut → yarı somut (resim) → soyut (sembol)</b>.</p>
+
+<h4>1) Sayı Kavramının Gelişimi (Sırayı Ezberle)</h4>
+<ol>
+<li><b>Ezbere sayma (rote counting):</b> "1,2,3,4,5" der ama nesneyle eşleştiremez. Şarkı gibidir.</li>
+<li><b>Birebir eşleme:</b> Her nesneye <b>bir</b> sayı adı. Sayı kavramının <b>ön koşulu</b>dur.</li>
+<li><b>Anlamlı sayma (rasyonel sayma):</b> Sayarak "kaç tane" olduğunu bulur.</li>
+<li><b>Kardinal sayı (çokluk):</b> Son söylediği sayının <b>toplam miktarı</b> verdiğini bilir. "1,2,3 → üç tane var."</li>
+<li><b>Sıra sayısı (ordinal):</b> Birinci, ikinci, üçüncü.</li>
+<li><b>Korunum:</b> Dizilim değişse de sayının değişmediğini bilir (<b>7 yaş civarı</b>, okul öncesinde beklenmez!).</li>
+</ol>
+<div class="tip-box"><b>💡 Kritik:</b> Çocuk "1,2,3,4,5" diyip nesneleri gösterirken atlıyor/tekrarlıyorsa sorun <b>birebir eşleme</b>dedir. "1,2,3" deyip "kaç tane?" sorusuna tekrar saymaya başlıyorsa eksik olan <b>kardinal sayı</b>dır. Bu ayrım vaka sorularının tam merkezidir.</div>
+
+<h4>2) Temel Matematik Kavramları</h4>
+<table>
+<tr><th>Kavram</th><th>Açıklama</th></tr>
+<tr><td><b>Eşleştirme</b></td><td>Aynı/benzer olanı bir araya getirme — en temel beceri</td></tr>
+<tr><td><b>Gruplama/Sınıflandırma</b></td><td>Renk, şekil, boyut gibi <b>tek bir özelliğe</b> göre; sonra çoklu özelliğe</td></tr>
+<tr><td><b>Sıralama (seriation)</b></td><td>Büyükten küçüğe, kısadan uzuna dizme</td></tr>
+<tr><td><b>Örüntü (pattern)</b></td><td>ABAB, AABB gibi tekrar eden düzen · <b>Cebirsel düşünmenin temeli</b></td></tr>
+<tr><td><b>Ölçme</b></td><td>Önce <b>standart olmayan</b> birim (karış, ayak, ataç), sonra standart</td></tr>
+<tr><td><b>Geometri</b></td><td>Şekiller, mekânda konum (altında, arkasında, yanında)</td></tr>
+<tr><td><b>Grafik</b></td><td>Nesne grafiği → resim grafiği → sembol grafiği</td></tr>
+<tr><td><b>Parça-bütün</b></td><td>Toplama-çıkarmanın zihinsel temeli</td></tr>
+</table>
+
+<h4>3) Öğretmenin Rolü</h4>
+<ul>
+<li><b>Matematiği günlük rutine gömer:</b> Yoklamada sayma, sofra kurarken birebir eşleme, sırada boy sıralaması.</li>
+<li><b>Somut materyal kullanır:</b> Sayı boncukları, bloklar, gerçek nesneler. <b>Çalışma kâğıdı öncelikli değildir.</b></li>
+<li><b>İşlem ezberi ve sembol yazdırma yaptırmaz.</b></li>
+<li>Matematik dilini modeller: "Seninki daha <b>uzun</b>, benimki daha <b>kısa</b>."</li>
+</ul>
+<div class="osym-alert"><b>🚨 Tuzak:</b> "Öğretmen çocuklara rakam yazma çalışması yaptırdı" veya "toplama işlemi öğretti" → okul öncesi programına <b>aykırıdır</b>. Ayrıca ölçmeye <b>cetvelle</b> değil, <b>karış/ataçla</b> başlanır.</div>
+<div class="banko"><b>🎯 2026 BANKO TAHMİN:</b> Öğretmen "kırmızı-mavi-kırmızı-mavi" dizip "sırada ne gelmeli?" diye soruyor. Bu hangi matematiksel beceridir ve neyin temelidir?<br><b>Cevap:</b> <b>Örüntü (ABAB)</b> — cebirsel düşünmenin ve genelleme yapmanın temelidir.</div>
+`},
+{cat:"alan", id:"sanat", icon:"🎨", title:"3. Erken Çocuklukta Güzel Sanatlar Eğitimi", exp:`
+<h3>Erken Çocuklukta Güzel Sanatlar Eğitimi</h3>
+<p>Sanat eğitiminde amaç <b>güzel resim yaptırmak değil</b>, çocuğun kendini özgürce ifade etmesidir. Burada tek bir cümle bütün soruları çözer: <b>SÜREÇ önemlidir, ÜRÜN değil.</b></p>
+
+<h4>1) Lowenfeld'e Göre Çizim Gelişimi (Kesin Ezber)</h4>
+<table>
+<tr><th>Dönem</th><th>Yaş</th><th>Özellikler</th></tr>
+<tr><td><b>Karalama</b></td><td>2-4</td><td>Rastgele → kontrollü → <b>adlandırılmış karalama</b> (çizip sonra isim verir: "bu babam")</td></tr>
+<tr><td><b>Şema öncesi</b></td><td>4-7</td><td><b>Baş-ayaklı insan</b> (kafadan çıkan bacaklar) · Nesneler havada, uzamsal düzen yok · Renk gerçekle ilgisiz (mor ağaç)</td></tr>
+<tr><td><b>Şematik</b></td><td>7-9</td><td><b>Taban çizgisi (yer çizgisi)</b> ve gökyüzü çizgisi belirir · <b>Röntgen (saydam) resim</b> · <b>Katlama/yatırma</b> · Renk gerçekçi</td></tr>
+<tr><td>Gerçekçilik</td><td>9-12</td><td>Ayrıntı ve oran kaygısı başlar</td></tr>
+</table>
+<div class="tip-box"><b>💡 Şifre:</b> <b>Baş-ayaklı insan</b> → şema öncesi (4-7). <b>Taban çizgisi + röntgen resim</b> → şematik (7-9). Bu ikisi ÖABT'de neredeyse her yıl karşımıza çıkar.</div>
+
+<h4>2) Anahtar Kavramlar</h4>
+<ul>
+<li><b>Röntgen (saydam) resim:</b> Evin içindeki insanları duvarın arkasından çizer — bildiğini çizer, gördüğünü değil.</li>
+<li><b>Katlama/yatırma:</b> Yolun iki yanındaki ağaçları yere yatık çizer.</li>
+<li><b>Abartma-eksiltme:</b> Önemli bulduğunu büyük çizer (topu tutan el kocaman).</li>
+<li><b>Otobiyografik çizim:</b> Kendi yaşantısını anlatır.</li>
+</ul>
+
+<h4>3) Öğretmenin Rolü — Yasaklar Listesi</h4>
+<ul>
+<li><b>Model/örnek resim vermez</b>, "böyle yap" demez. Kopyalatmak yaratıcılığı öldürür.</li>
+<li><b>Boyama kitabı ve hazır kalıp kullandırmaz.</b></li>
+<li>Çocuğun resmine <b>müdahale etmez</b>, üzerine çizmez, düzeltmez.</li>
+<li><b>"Bu ne?" diye sormaz</b> — çocuğu yargılanmış hissettirir. Yerine: <b>"Bana resmini anlatır mısın?"</b></li>
+<li><b>Değerlendirmede kıyaslama ve yarışma yoktur</b>, hepsi sergilenir.</li>
+<li>"Aferin çok güzel olmuş" gibi <b>ürüne yönelik övgü</b> yerine <b>süreci betimler</b>: "Burada çok fazla mavi kullanmışsın."</li>
+</ul>
+<div class="osym-alert"><b>🚨 Tuzak:</b> "En güzel resmi seçip ödüllendirdi", "örnek gösterip aynısını yaptırdı", "resmin neresi eksik diye sordu" → hepsi yanlıştır. Doğru cevap <b>çocuğu anlatmaya davet eden ve karşılaştırma yapmayan</b> seçenektir.</div>
+<div class="banko"><b>🎯 2026 BANKO TAHMİN:</b> 5 yaşındaki çocuk kafadan doğrudan çıkan iki bacakla insan çiziyor ve nesneler kâğıtta havada duruyor. Lowenfeld'e göre hangi dönemdedir?<br><b>Cevap:</b> <b>Şema öncesi dönem (4-7)</b> — baş-ayaklı insan ve uzamsal düzenin olmaması bu dönemin işaretidir.</div>
+`},
+{cat:"alan", id:"muzik", icon:"🎵", title:"4. Erken Çocuklukta Müzik Eğitimi", exp:`
+<h3>Erken Çocuklukta Müzik Eğitimi</h3>
+<p>Müzik eğitimi çocuğa <b>nota öğretmek değildir</b>. Amaç; ritim duygusu, dinleme becerisi, ses farkındalığı ve müzikle kendini ifade etmedir. En çok soru <b>yaklaşımlardan</b> (Orff, Kodály, Dalcroze) gelir.</p>
+
+<h4>1) Müzik Yaklaşımları — Kim Ne Der?</h4>
+<table>
+<tr><th>Yaklaşım</th><th>Özü</th><th>Tanınma ipucu</th></tr>
+<tr><td><b>Orff (Orff-Schulwerk)</b></td><td>Müzik + hareket + dil + dans <b>bir bütündür</b> · <b>Doğaçlama</b> ve yaratıcılık esas · <b>Beden perküsyonu</b> (el çırpma, diz vurma, parmak şıklatma) · Orff çalgıları (ksilofon, marakas, ritim çubuğu)</td><td>"Doğaçlama", "beden perküsyonu", "vurmalı çalgı"</td></tr>
+<tr><td><b>Kodály</b></td><td><b>İnsan sesi</b> temel çalgıdır, önce şarkı söylenir · <b>Halk müziği ve ana dil</b> merkezli · <b>El işaretleri</b> (solfej) · Önce kulak, sonra nota</td><td>"Şarkı söyleme", "el işareti", "halk türküsü"</td></tr>
+<tr><td><b>Dalcroze (Eurhythmics)</b></td><td>Müzik <b>bedenle</b> öğrenilir · Ritmi <b>hareketle</b> yaşama · Beden bir enstrümandır</td><td>"Müziğe göre yürüme/hareket", "ritmik jimnastik"</td></tr>
+<tr><td><b>Suzuki</b></td><td><b>Ana dil yöntemi</b>: müzik dil gibi <b>dinleyerek/taklitle</b> öğrenilir · Erken başlama · <b>Aile katılımı şart</b> · Bireysel çalgı eğitimi</td><td>"Dinleyerek taklit", "anne de derse katılır"</td></tr>
+</table>
+<div class="tip-box"><b>💡 Şifre:</b> <b>Orff = doğaçlama + beden perküsyonu</b> · <b>Kodály = ses/şarkı + el işareti</b> · <b>Dalcroze = hareket/ritim</b> · <b>Suzuki = dinle-taklit et + aile</b>.</div>
+
+<h4>2) Müzik Etkinlik Türleri</h4>
+<ul>
+<li><b>Ses dinleme ve ayırt etme:</b> Çevredeki sesler, ince-kalın, uzun-kısa, hızlı-yavaş, sessizlik.</li>
+<li><b>Ritim çalışmaları:</b> Beden perküsyonu, ritim aletleri, tekerlemeye ritim tutma.</li>
+<li><b>Şarkı söyleme:</b> Çocuğun ses sınırına uygun (dar ses aralıklı), <b>kısa ve tekrarlı</b> şarkılar.</li>
+<li><b>Yaratıcı hareket ve dans.</b></li>
+<li><b>Müzikli öykü, müzik eşliğinde drama, çalgı yapımı</b> (atık materyalden marakas).</li>
+</ul>
+
+<h4>3) Öğretmenin Rolü</h4>
+<ul>
+<li>Şarkıyı <b>bütün olarak</b> ve <b>doğru tonda</b> söyleyerek model olur; parça parça ezberletmez.</li>
+<li>Sesi güzel olmayan çocuğu <b>ayırmaz, susturmaz</b>, koroda dışlamaz.</li>
+<li>Müziği yalnızca "eğlence" değil, <b>geçiş ve rutinlerde</b> de kullanır (toplanma şarkısı).</li>
+<li>Nota okumaya ve teoriye <b>girmez</b>.</li>
+</ul>
+<div class="osym-alert"><b>🚨 Tuzak:</b> "Sesi uyumsuz çocuğu dinleyici yaptı" veya "notaları öğretti" → kesin yanlış. Ayrıca <b>Orff ile Dalcroze</b> sürekli karıştırılır: doğaçlama ve çalgı vurgusu varsa <b>Orff</b>, saf beden hareketi/ritim vurgusu varsa <b>Dalcroze</b>.</div>
+<div class="banko"><b>🎯 2026 BANKO TAHMİN:</b> Öğretmen çocuklarla el çırparak, dizlerine vurarak tekerlemeye ritim tutuyor ve çocukların kendi ritimlerini uydurmasını istiyor. Hangi yaklaşımdır?<br><b>Cevap:</b> <b>Orff</b> — beden perküsyonu + doğaçlama ikilisi Orff'un imzasıdır.</div>
+`},
+{cat:"alan", id:"edebiyat", icon:"📖", title:"13. Erken Çocukluk Edebiyatı", exp:`
+<h3>Erken Çocukluk Edebiyatı</h3>
+<p>Çocuk edebiyatı; dil gelişimi, hayal gücü, empati ve okuma sevgisinin temelidir. ÖABT'de en çok <b>kitap seçim ölçütleri</b> ve <b>öğretmenin kitap okuma davranışı</b> sorulur.</p>
+
+<h4>1) Kitap Seçim Ölçütleri</h4>
+<table>
+<tr><th>Boyut</th><th>Aranan Özellik</th></tr>
+<tr><td><b>Fiziksel</b></td><td>Sağlam, kalın sayfalı, zararsız boya, kolay tutulur boyut, zımba/keskin köşe yok</td></tr>
+<tr><td><b>Görsel (resimler)</b></td><td>Metinle <b>uyumlu</b>, sayfayı domine eden, sade arka planlı, canlı ama abartısız · <b>Resim metnin önündedir</b> (çocuk okuma bilmez)</td></tr>
+<tr><td><b>İçerik</b></td><td>Çocuğun <b>yaş ve gelişim düzeyine uygun</b>, ilgi çekici, çocuğun yaşantısıyla bağlantılı</td></tr>
+<tr><td><b>Dil</b></td><td>Yalın, anlaşılır, <b>tekrarlı</b> yapılar, kulağa hoş gelen, doğru Türkçe · Argo/ağız kullanımı yok</td></tr>
+<tr><td><b>Eğitsel</b></td><td><b>Doğrudan öğüt vermez</b>, ahlak dersi vermez; çocuk sonucu kendi çıkarır</td></tr>
+<tr><td><b>Kahramanlar</b></td><td>Çocuğun özdeşim kurabileceği, <b>klişe ve önyargı içermeyen</b> (cinsiyet/meslek kalıbı yok)</td></tr>
+</table>
+<div class="tip-box"><b>💡 Kritik:</b> "Kitap çocuğa <b>ders vermeli</b>, sonunda öğüt bulunmalı" diyen seçenek <b>daima yanlıştır</b>. İyi çocuk kitabı <b>didaktik (öğütçü) değildir</b>; çocuk kendi sonucunu üretir.</div>
+
+<h4>2) Türler</h4>
+<ul>
+<li><b>Resimli öykü kitabı:</b> Okul öncesinin temel türü.</li>
+<li><b>Masal:</b> Olağanüstü öğeler; korku öğesi ve şiddet <b>ayıklanmalı</b>.</li>
+<li><b>Fabl:</b> Hayvanlar üzerinden ders — okul öncesinde <b>dikkatli</b> kullanılır (soyut ders çıkarımı zordur).</li>
+<li><b>Şiir, tekerleme, bilmece, sayışmaca:</b> Ses ve ritim farkındalığı (fonolojik farkındalık) için birebir.</li>
+<li><b>Bilgi kitabı</b>, <b>sessiz kitap</b> (yalnız resim), <b>etkileşimli kitap</b> (kaldır-bak).</li>
+</ul>
+
+<h4>3) Öğretmenin Kitap Okuma Davranışı</h4>
+<ul>
+<li><b>Okuma öncesi:</b> Kapak, isim, yazar-çizer tanıtımı; <b>"Sizce ne olacak?"</b> ile tahmin aldırır.</li>
+<li><b>Okuma sırası:</b> Yüz çocuğa dönük, kitap <b>herkesin göreceği</b> şekilde; ses tonuyla canlandırır; <b>her sözcüğü açıklamak için sürekli bölmez</b>.</li>
+<li><b>Okuma sonrası:</b> Açık uçlu sorular, drama, resim, öyküyü yeniden anlatma, <b>farklı son yazdırma</b>.</li>
+<li><b>Etkileşimli okuma (diyalojik okuma):</b> Çocuk dinleyici değil, konuşmanın <b>ortağıdır</b>.</li>
+</ul>
+<div class="osym-alert"><b>🚨 Tuzak:</b> "Öğretmen kitabı okuyup 'bundan ne ders çıkardık?' diye sordu" → öğütçü yaklaşım, yanlış. Doğru olan <b>açık uçlu, çocuğu düşündüren</b> sorulardır.</div>
+<div class="banko"><b>🎯 2026 BANKO TAHMİN:</b> Bir çocuk kitabında sürekli tekrar eden "Çıt çıt! Kim o?" cümlesi çocuğun hangi gelişimini destekler?<br><b>Cevap:</b> <b>Dil gelişimi ve fonolojik (sesbilgisel) farkındalık</b>; tekrar, çocuğun kitaba katılmasını ve sözcük dağarcığını da güçlendirir.</div>
+`},
+{cat:"uygulama", id:"oyun", icon:"🧸", title:"5. Erken Çocukluk Eğitiminde Oyun", exp:`
+<h3>Erken Çocukluk Eğitiminde Oyun</h3>
+<p>Oyun, okul öncesinin <b>merkezi</b>dir. Çocuk için oyun "boş vakit" değil, <b>en ciddi işi</b> ve <b>temel öğrenme yolu</b>dur. ÖABT'de en çok <b>Piaget ve Parten sınıflamaları</b> ile <b>öğretmenin oyuna müdahalesi</b> sorulur.</p>
+
+<h4>1) PIAGET — Bilişsel Oyun Sınıflaması</h4>
+<table>
+<tr><th>Oyun</th><th>Yaş</th><th>Özellik</th></tr>
+<tr><td><b>Alıştırmalı (fonksiyonel/duyu-motor)</b></td><td>0-2</td><td>Tekrar yoluyla haz: nesneyi düşürüp durma, koşma, sallama</td></tr>
+<tr><td><b>Sembolik (-mış gibi/hayali)</b></td><td>2-7</td><td><b>Okul öncesinin baskın oyunu</b> · Muzu telefon yapma, evcilik, doktorculuk</td></tr>
+<tr><td><b>Kurallı</b></td><td>7+</td><td>Ortak kural, yarışma, sıra alma · Somut işlemlerle gelir</td></tr>
+<tr><td>(Yapılandırma)</td><td>2+</td><td>Bir ürün ortaya koyma: bloklarla kule, kum kalesi</td></tr>
+</table>
+
+<h4>2) PARTEN — Sosyal Oyun Sınıflaması (Sıra Kritik)</h4>
+<ol>
+<li><b>Boş/amaçsız davranış:</b> Oyun yok, rastgele bakınma.</li>
+<li><b>Tek başına (yalnız) oyun:</b> Kendi başına, başkasıyla ilgilenmez.</li>
+<li><b>İzleyici (seyirci) oyun:</b> <b>Oynamaz ama izler</b>, hatta konuşur, soru sorar — ama katılmaz.</li>
+<li><b>Paralel oyun:</b> <b>Yan yana, aynı oyuncakla, AMA birlikte değil.</b> Etkileşim yok.</li>
+<li><b>Birlikte (asosiyatif) oyun:</b> Etkileşim var, oyuncak paylaşılır <b>ama ortak amaç/iş bölümü YOK</b>.</li>
+<li><b>İş birlikli (kooperatif) oyun:</b> <b>Ortak amaç + rol dağılımı + kural</b>. En üst düzey.</li>
+</ol>
+<div class="tip-box"><b>💡 En Çok Karıştırılan İkili — Paralel mi Birlikte mi?</b> <b>Etkileşim var mı?</b> Yan yana oynuyor ama birbirine bakmıyor/konuşmuyorsa <b>paralel</b>. Konuşuyor, oyuncak alışverişi yapıyor ama herkes kendi işini yapıyorsa <b>birlikte (asosiyatif)</b>. Ortak bir amaç ve roller varsa ("sen doktor ol, ben hasta") <b>iş birlikli</b>.</div>
+
+<h4>3) Öğretmenin Oyundaki Rolü</h4>
+<ul>
+<li>Oyunu <b>yönetmez</b>, zenginleştirir. Gerektiğinde <b>oyunun içine girer</b> ama liderliği ele almaz.</li>
+<li><b>Zaman, alan ve materyal</b> sağlar; kesintisiz oyun süresi tanır.</li>
+<li><b>Açık uçlu materyal</b> verir (blok, kumaş, karton) — tek işlevli oyuncak yaratıcılığı sınırlar.</li>
+<li>Oyunu <b>gözleyerek değerlendirir</b>: gelişimin en doğal ölçme aracı oyundur.</li>
+<li>Çatışmada hemen araya girmez; <b>çocukların çözmesine fırsat tanır</b>.</li>
+</ul>
+<div class="osym-alert"><b>🚨 Tuzak:</b> "Öğretmen oyunu başlattı, kuralları koydu ve yönetti" → yanlış. Ayrıca <b>oyuncak = oyun değildir</b>; pahalı oyuncak iyi oyun demek değildir. Çocuk oyun içindeyken sürekli bölüp "şunu da öğret" demek de yanlıştır.</div>
+<div class="banko"><b>🎯 2026 BANKO TAHMİN:</b> Ali ve Ayşe aynı masada, aynı legolarla, yan yana oynuyor ama birbirleriyle hiç konuşmuyor ve ayrı ayrı kule yapıyorlar. Parten'e göre bu hangi oyundur?<br><b>Cevap:</b> <b>Paralel oyun</b> — yakınlık var, etkileşim yok.</div>
+`},
+{cat:"uygulama", id:"drama", icon:"🎭", title:"6. Erken Çocukluk Eğitiminde Drama", exp:`
+<h3>Erken Çocukluk Eğitiminde Drama</h3>
+<p>Yaratıcı drama; bir konunun <b>doğaçlama ve rol oynama</b> yoluyla, grup içinde, yaşantı yoluyla canlandırılmasıdır. <b>Süreç odaklıdır, seyirci için yapılmaz.</b> Tiyatro değildir!</p>
+
+<h4>1) Dramanın Aşamaları (Kesin Sıra)</h4>
+<ol>
+<li><b>Isınma-Hazırlık:</b> Tanışma, güven, uyum, ısınma oyunları. Grubu birbirine ve konuya hazırlar. <b>Atlanamaz.</b></li>
+<li><b>Canlandırma (Oynama):</b> Asıl bölüm. Doğaçlama, rol oynama, kurgu. Yaratıcılık burada ortaya çıkar.</li>
+<li><b>Değerlendirme (Rahatlama/Tartışma):</b> "Ne hissettin?", "Başka nasıl olabilirdi?" Duygular paylaşılır, <b>rollerden çıkılır</b>.</li>
+</ol>
+<div class="tip-box"><b>💡 Vazgeçilmez:</b> Isınma yapılmadan canlandırmaya geçilmez; değerlendirme yapılmadan drama bitmez. Soruda "öğretmen doğrudan canlandırmaya başlattı" → <b>yanlış</b>.</div>
+
+<h4>2) Temel Kavramlar</h4>
+<table>
+<tr><th>Kavram</th><th>Açıklama</th></tr>
+<tr><td><b>Doğaçlama</b></td><td>Yazılı metin ve önceden belirlenmiş replik <b>yoktur</b>; anlık üretim</td></tr>
+<tr><td><b>Rol oynama</b></td><td>Bir kimliğe bürünme, o kişinin gözünden bakma → <b>empati</b></td></tr>
+<tr><td><b>Öğretmenin role girmesi</b></td><td>Öğretmen de bir rol alarak süreci içeriden yönlendirir</td></tr>
+<tr><td><b>Donuk imge (freeze)</b></td><td>Bir anın heykel gibi dondurulması</td></tr>
+<tr><td><b>Pandomim</b></td><td>Konuşmadan, yalnızca beden diliyle anlatma</td></tr>
+<tr><td><b>Lider</b></td><td>Dramayı yöneten öğretmen — yönetir ama <b>oynatmaz, dayatmaz</b></td></tr>
+</table>
+
+<h4>3) Drama ≠ Tiyatro (Ayrımı Ezberle)</h4>
+<table>
+<tr><th></th><th>Yaratıcı Drama</th><th>Tiyatro</th></tr>
+<tr><td>Metin</td><td>Yok, <b>doğaçlama</b></td><td>Yazılı metin var</td></tr>
+<tr><td>Seyirci</td><td><b>Yok</b> (herkes katılımcı)</td><td>Var</td></tr>
+<tr><td>Amaç</td><td><b>Süreç</b>, yaşantı, gelişim</td><td>Ürün, gösteri</td></tr>
+<tr><td>Prova</td><td>Yok</td><td>Var</td></tr>
+</table>
+
+<h4>4) Öğretmenin Rolü</h4>
+<ul>
+<li>Katılım <b>gönüllüdür</b>; oynamak istemeyen zorlanmaz, izleyebilir.</li>
+<li>"Yanlış canlandırma" yoktur; <b>doğru-yanlış değerlendirmesi yapılmaz</b>.</li>
+<li><b>Ezber replik verilmez</b>, kostüm-dekor şart değildir.</li>
+<li>Veliye gösteri olarak <b>sunulmaz</b> (o zaman tiyatro olur).</li>
+</ul>
+<div class="osym-alert"><b>🚨 Tuzak:</b> "Öğretmen replikleri dağıttı ve prova yaptırdı, velilere gösterdi" → bu <b>tiyatro</b>dur, drama değildir. En sevilen çeldirici budur.</div>
+<div class="banko"><b>🎯 2026 BANKO TAHMİN:</b> Öğretmen çocuklardan "ormanda kaybolmuş bir çocuk" anını heykel gibi donarak göstermelerini istiyor. Bu hangi drama tekniğidir?<br><b>Cevap:</b> <b>Donuk imge (freeze/heykel)</b>.</div>
+`},
+{cat:"uygulama", id:"yaklasimlar", icon:"🧠", title:"7. Öğrenme Kuramları ve Yaklaşımları", exp:`
+<h3>Öğrenme Kuramları ve Yaklaşımları</h3>
+<p>ÖABT'nin en çok soru gelen alanlarından. Ezber değil <b>vaka tanıma</b> ister: "Öğretmen X yaptı, hangi kuram?"</p>
+
+<h4>A) DAVRANIŞÇI KURAMLAR</h4>
+<table>
+<tr><th>Kuram</th><th>Kilit</th></tr>
+<tr><td><b>Klasik Koşullanma (Pavlov)</b></td><td>Nötr uyarıcı + doğal uyarıcı → <b>refleksif/duygusal</b> öğrenme · Okul korkusu, beyaz önlük görünce ağlama · Kavramlar: <b>genelleme</b>, <b>ayırt etme</b>, <b>sönme</b>, <b>kendiliğinden geri gelme</b></td></tr>
+<tr><td><b>Bitişiklik (Watson/Guthrie)</b></td><td>Alışkanlık kırma: <b>eşik</b>, <b>bıktırma</b>, <b>zıt tepki</b></td></tr>
+<tr><td><b>Bağlaşımcılık (Thorndike)</b></td><td><b>Deneme-yanılma</b> · Etki, tekrar, hazırbulunuşluk yasaları</td></tr>
+<tr><td><b>Edimsel Koşullanma (Skinner)</b></td><td>Davranış <b>sonucuna</b> göre şekillenir</td></tr>
+</table>
+<h4>Skinner Tablosu (Ezber Şart)</h4>
+<table>
+<tr><th></th><th>Davranış ARTAR</th><th>Davranış AZALIR</th></tr>
+<tr><td><b>Bir şey VERİLİR</b></td><td><b>Olumlu pekiştireç</b> (aferin, çıkartma)</td><td><b>I. tip ceza</b> (azarlama)</td></tr>
+<tr><td><b>Bir şey ALINIR</b></td><td><b>Olumsuz pekiştireç</b> (sevmediği görevin kaldırılması)</td><td><b>II. tip ceza</b> (oyun hakkını alma)</td></tr>
+</table>
+<div class="tip-box"><b>💡 Altın Kural:</b> <b>Pekiştirme = davranış ARTAR</b> (olumlusu da olumsuzu da). <b>Ceza = davranış AZALIR</b>. "Olumsuz pekiştireç bir cezadır" diyen seçenek <b>daima yanlıştır</b> — ÖSYM'nin bir numaralı tuzağı budur.</div>
+<p><b>Pekiştirme tarifeleri:</b> Sürekli → öğrenme <b>en hızlı</b>. Aralıklı → sönmeye <b>en dirençli</b>. <b>Değişken oranlı</b> → en dirençli.<br>
+<b>Premack ilkesi:</b> Sevilen etkinlik, sevilmeyene pekiştireç ("Toplarsan oynayabilirsin").<br>
+<b>Şekil verme (ardışık yaklaşma):</b> Hedefe yaklaşan her adımı pekiştirme.</p>
+
+<h4>B) BİLİŞSEL VE SOSYAL KURAMLAR</h4>
+<ul>
+<li><b>Gestalt:</b> Bütün, parçaların toplamından farklıdır · <b>Kavrayış (insight)</b> ile ani öğrenme (Köhler'in maymunu).</li>
+<li><b>Tolman:</b> <b>Gizil (örtük) öğrenme</b> — öğrenme var, performans yok; pekiştireç gelince görünür · <b>Bilişsel harita</b>.</li>
+<li><b>Bandura (Sosyal Bilişsel):</b> <b>Model alarak/gözleyerek</b> öğrenme · Süreç: <b>Dikkat → Hatırda tutma → Davranışı meydana getirme → Güdülenme</b> · <b>Dolaylı pekiştirme/ceza</b> · <b>Öz-yeterlik</b> · Okul öncesinde öğretmen <b>en güçlü modeldir</b>.</li>
+<li><b>Ausubel:</b> Anlamlı öğrenme, <b>ön örgütleyici</b>, sunuş yolu.</li>
+<li><b>Bruner:</b> <b>Buluş yolu</b> · Temsil biçimleri: <b>eylemsel → imgesel → sembolik</b> · Sarmal program.</li>
+<li><b>Vygotsky:</b> <b>Yakınsak gelişim alanı</b>, <b>yapı iskelesi (scaffolding)</b>, dil ve kültür merkezli.</li>
+</ul>
+
+<h4>C) BİLGİYİ İŞLEME KURAMI</h4>
+<p>Duyusal kayıt → <b>Dikkat + seçici algı</b> → Kısa süreli bellek (<b>7±2 birim, ~20 sn</b>; <b>gruplama</b> ile artar) → <b>Anlamlandırma/tekrar</b> → Uzun süreli bellek → <b>Geri getirme</b>.<br>
+<b>Ket vurma:</b> <b>İleriye ket</b> = önceki sonrakini engeller · <b>Geriye ket</b> = sonraki öncekini bastırır.<br>
+<b>Yürütücü biliş (üst biliş):</b> Kendi öğrenmesinin farkında olma.</p>
+<div class="osym-alert"><b>🚨 Tuzak:</b> <b>Klasik koşullanma refleksif/istem dışı</b>dır (korku, kaygı, sevinç). <b>Edimsel istemli</b>dir (el kaldırma, toplama). Vakada tepki "kendiliğinden/duygusal" ise klasik, "sonucuna göre yapılıyor" ise edimseldir.</div>
+<div class="banko"><b>🎯 2026 BANKO TAHMİN:</b> Öğretmen, oyuncakları toplayan çocuğu överken diğer çocukların da toplamaya başlaması hangi kavramdır?<br><b>Cevap:</b> <b>Dolaylı pekiştirme</b> (Bandura) — başkasının aldığı pekiştireci gözleyerek davranışı edinme.</div>
+`},
+{cat:"uygulama", id:"okulauyum", icon:"🎒", title:"8. Okula Uyum ve Erken Okuryazarlık", exp:`
+<h3>Okula Uyum ve Erken Okuryazarlık</h3>
+<p>İki başlık bir arada: çocuğun okula/okul öncesine uyumu ve <b>okuma-yazmaya hazırlık</b>. Dikkat: okul öncesinde <b>okuma-yazma öğretilmez</b>, <b>hazırlık</b> yapılır.</p>
+
+<h4>1) Okula Uyum</h4>
+<ul>
+<li><b>Ayrılık kaygısı</b> normaldir; 8 aydan itibaren görülür, okula başlarken yeniden alevlenir.</li>
+<li><b>Kademeli uyum</b> (aşamalı başlama) uygulanır: kısa süreli, anne yanında, giderek uzayan.</li>
+<li>Öğretmen <b>rutin ve öngörülebilirlik</b> kurar — rutin, çocuğa güven verir.</li>
+<li>Veli <b>kaçarak/gizlice gitmemeli</b>; vedalaşıp gitmeli. Gizlice gitmek güveni yıkar.</li>
+<li>Ağlayan çocuk <b>"ayıplanmaz, kandırılmaz"</b>; duygusu kabul edilir ("Annene özledin, bu çok normal").</li>
+</ul>
+
+<h4>2) Erken Okuryazarlık Bileşenleri</h4>
+<table>
+<tr><th>Bileşen</th><th>Açıklama</th></tr>
+<tr><td><b>Sesbilgisel (fonolojik) farkındalık</b></td><td>Sesleri fark etme/oynama: uyak, ilk ses, hece sayma, sesi ayırma · <b>Okumanın en güçlü yordayıcısı</b></td></tr>
+<tr><td><b>Yazı farkındalığı</b></td><td>Yazının anlam taşıdığını, soldan sağa okunduğunu bilme; kitabın nasıl tutulacağı</td></tr>
+<tr><td><b>Sözcük dağarcığı</b></td><td>Kelime bilgisi — anlama becerisinin temeli</td></tr>
+<tr><td><b>Alfabe bilgisi</b></td><td>Harflerin adı/sesi (zorlamadan, doğal ortamda)</td></tr>
+<tr><td><b>Dinlediğini anlama</b></td><td>Öykü sonrası anlatma, sıralama</td></tr>
+<tr><td><b>Yazı öncesi (kalem) becerileri</b></td><td>Küçük kas, göz-el koordinasyonu, çizgi çalışmaları</td></tr>
+</table>
+<div class="tip-box"><b>💡 Kritik:</b> <b>Fonolojik farkındalık</b> okumaya geçişin en güçlü yordayıcısıdır. Tekerleme, uyak, "ali-armut-at hangisi 'a' ile başlar?" oyunları tam da budur.</div>
+
+<h4>3) Okuma-Yazmaya Hazırlık Çalışmaları</h4>
+<ul>
+<li>Görsel algı: şekil-zemin, şekil sabitliği, mekânda konum, parça-bütün.</li>
+<li>İşitsel algı, dikkat-bellek, el-göz koordinasyonu, çizgi çalışmaları.</li>
+<li><b>Kitap köşesi, yazı köşesi</b> — çocuk yazıyı doğal ortamda görsün.</li>
+<li><b>Karalama-yazma (emergent writing):</b> Çocuğun "yazı gibi" karalaması <b>desteklenir</b>, düzeltilmez.</li>
+</ul>
+<div class="osym-alert"><b>🚨 En Büyük Tuzak:</b> "Öğretmen harfleri öğretti, defter tutturdu, satır çalışması yaptırdı" → okul öncesi programına <b>aykırıdır</b>. Amaç <b>hazırlık</b>tır; okuma-yazma öğretimi <b>ilkokulun işidir</b>.</div>
+<div class="banko"><b>🎯 2026 BANKO TAHMİN:</b> Öğretmen "kedi-keçi-kalem... hepsi hangi sesle başlıyor?" diye soruyor. Bu hangi beceriyi destekler?<br><b>Cevap:</b> <b>Sesbilgisel (fonolojik) farkındalık</b> — okumaya geçişin en güçlü yordayıcısı.</div>
+`},
+{cat:"uygulama", id:"temeller", icon:"🏫", title:"9. Temeller, Program ve Yaklaşımlar", exp:`
+<h3>Temeller, Program ve Yaklaşımlar</h3>
+<p>Okul öncesi eğitimin tarihsel kökleri, MEB programının yapısı ve dünya yaklaşımları. ÖABT'de <b>yaklaşımlar</b> (Montessori, Reggio, HighScope, Waldorf) neredeyse her yıl sorulur.</p>
+
+<h4>1) Öncüler</h4>
+<table>
+<tr><th>Kişi</th><th>Katkısı</th></tr>
+<tr><td><b>Comenius</b></td><td>İlk resimli çocuk kitabı (Orbis Pictus) · "Her şeyi herkese öğret"</td></tr>
+<tr><td><b>Rousseau</b></td><td>"Çocuk küçük bir yetişkin değildir" · <b>Doğaya dönüş</b>, Emile</td></tr>
+<tr><td><b>Pestalozzi</b></td><td>Baş-kalp-el (bilgi-duygu-beceri) bütünlüğü · Sevgi ve gözlem</td></tr>
+<tr><td><b>Fröbel</b></td><td><b>Anaokulunun (Kindergarten) kurucusu</b> · <b>Oyun</b> ve "hediyeler (gifts)" materyali</td></tr>
+<tr><td><b>Dewey</b></td><td><b>Yaparak-yaşayarak</b> öğrenme · Eğitim yaşamın kendisidir · Demokratik ortam</td></tr>
+<tr><td><b>Montessori</b></td><td>Hazırlanmış çevre, duyu eğitimi</td></tr>
+</table>
+
+<h4>2) Dünya Yaklaşımları — Kim Ne Der?</h4>
+<table>
+<tr><th>Yaklaşım</th><th>Özü</th><th>İpucu</th></tr>
+<tr><td><b>Montessori</b></td><td><b>Hazırlanmış çevre</b> · <b>Kendi kendini düzelten (öz-denetimli) materyal</b> · Çocuk boyu mobilya · <b>Karma yaş grubu</b> · Öğretmen <b>gözlemci ve rehber</b> · Duyu eğitimi · Günlük yaşam becerileri · <b>Hayal/sembolik oyuna mesafeli</b></td><td>"Materyal hatayı kendi gösterir", "karma yaş"</td></tr>
+<tr><td><b>Reggio Emilia</b></td><td><b>Çocuğun 100 dili</b> · <b>Proje temelli</b> · <b>Belgeleme (dokümantasyon)</b> · <b>Atölye (atelier) ve atelierista</b> · <b>Çevre üçüncü öğretmendir</b> · Aile ve toplum katılımı yüksek</td><td>"Proje", "belgeleme", "atölye", "100 dil"</td></tr>
+<tr><td><b>HighScope</b></td><td><b>Planla-Yap-Değerlendir (Plan-Do-Review)</b> · Aktif öğrenme · <b>Anahtar gelişimsel göstergeler</b> · Tutarlı günlük rutin</td><td>"Önce planladı, sonra yaptı, sonra anlattı"</td></tr>
+<tr><td><b>Waldorf (Steiner)</b></td><td>Hayal gücü ve sanat merkezli · <b>Doğal ve basit materyal</b> (yüzü olmayan bez bebek) · <b>Taklit ve ritim</b> · <b>Ekran/teknoloji yok</b> · Erken akademik öğretime karşı</td><td>"Doğal materyal", "hayal gücü", "ritim"</td></tr>
+<tr><td><b>Bank Street</b></td><td>Gelişimsel etkileşim, sosyal deneyim</td><td>—</td></tr>
+<tr><td><b>Head Start</b></td><td>ABD'de <b>dezavantajlı çocuklar</b> için telafi programı</td><td>"Yoksul aileler, erken müdahale"</td></tr>
+<tr><td><b>Orman okulu</b></td><td>Doğada, açık havada öğrenme, risk alma</td><td>—</td></tr>
+</table>
+<div class="tip-box"><b>💡 Şifre:</b> <b>Montessori = hazırlanmış çevre + öz-denetimli materyal</b> · <b>Reggio = proje + belgeleme + 100 dil</b> · <b>HighScope = planla-yap-değerlendir</b> · <b>Waldorf = hayal + doğal materyal + ekran yok</b>.</div>
+
+<h4>3) MEB Okul Öncesi Eğitim Programının Özellikleri</h4>
+<ul>
+<li><b>Çocuk merkezli</b> · <b>Gelişimsel</b> (kazanım ve göstergeler gelişim alanlarına göre) · <b>Sarmal</b> · <b>Esnek</b> · <b>Eklektik</b> (tek bir yaklaşıma bağlı değil) · <b>Oyun temelli</b> · <b>Dengeli</b> · <b>Yaratıcılığı esas alan</b> · <b>Aile katılımına önem veren</b> · <b>Uyarlanabilir</b> (özel gereksinimli çocuklar).</li>
+<li><b>Kazanım ve göstergeler</b> gelişim alanlarına göre verilir; öğretmen <b>etkinliği kendi planlar</b>.</li>
+<li><b>Etkinlik türleri:</b> Türkçe, sanat, drama, müzik, hareket, oyun, fen, matematik, okuma-yazmaya hazırlık, alan gezileri.</li>
+<li><b>Bütünleştirilmiş etkinlik:</b> Birden çok etkinlik türünün tek akışta birleştirilmesi — programın önerdiği yoldur.</li>
+<li><b>Günlük eğitim akışı:</b> Güne başlama → oyun → etkinlikler → beslenme/temizlik → günü değerlendirme → eve gidiş.</li>
+</ul>
+<div class="osym-alert"><b>🚨 Tuzak:</b> MEB programı <b>eklektiktir</b>; "tamamen Montessori'ye dayanır" diyen seçenek yanlıştır. Ayrıca program <b>konu merkezli değil</b>, <b>kazanım/gelişim merkezlidir</b>.</div>
+<div class="banko"><b>🎯 2026 BANKO TAHMİN:</b> Çocuklar sabah ne yapacaklarını söylüyor, sonra köşelerde çalışıyor, sonunda ne yaptıklarını gruba anlatıyor. Bu hangi yaklaşımdır?<br><b>Cevap:</b> <b>HighScope</b> — Planla-Yap-Değerlendir döngüsü.</div>
+`},
+{cat:"cocuk", id:"gelisim", icon:"📈", title:"11. Gelişim (Bilişsel, Ahlak, Psikososyal)", exp:`
+<h3>Gelişim — ÖABT'nin En Ağırlıklı Konusu</h3>
+<p>50'lik denemede <b>8 soru</b> ile açık ara birinci. Piaget, Erikson, Kohlberg, Vygotsky, Freud neredeyse her yıl var.</p>
+
+<h4>Gelişimin Temel İlkeleri</h4>
+<ul>
+<li><b>Baştan ayağa</b> (baş-sona) ve <b>içten dışa</b> (merkezden çevreye) ilerler.</li>
+<li><b>Genelden özele:</b> Önce büyük kaslar, sonra küçük kaslar.</li>
+<li>Süreklidir ama <b>hızı her dönemde aynı değildir</b> (0-2 ve ergenlik en hızlı).</li>
+<li><b>Sıra değişmez, hız değişir</b> — bireysel farklılık vardır.</li>
+<li><b>Kritik dönem</b> vardır. <b>Olgunlaşma + öğrenme = hazırbulunuşluk.</b> Olgunlaşmadan öğrenme olmaz.</li>
+</ul>
+
+<h4>1) PIAGET — Bilişsel Gelişim</h4>
+<table>
+<tr><th>Dönem</th><th>Yaş</th><th>Özellikler</th></tr>
+<tr><td><b>Duyusal-Motor</b></td><td>0-2</td><td>Refleksler · <b>Nesne sürekliliği</b> (en önemli kazanım) · Döngüsel tepkiler · <b>Ertelenmiş taklit</b></td></tr>
+<tr><td><b>İşlem Öncesi</b></td><td><b>2-7 (okul öncesi!)</b></td><td><b>Benmerkezcilik</b> · <b>Animizm</b> (canlandırmacılık: "masa beni çarptı") · <b>Yapaycılık</b> (her şeyi insan yaptı) · <b>Korunum YOK</b> · <b>Odaklanma/merkezleme</b> (tek boyut) · <b>Tersine çevirememe</b> · <b>Sembolik oyun</b> · <b>Özelden özele akıl yürütme (transdüktif)</b> · Sınıflandırma zayıf</td></tr>
+<tr><td><b>Somut İşlemler</b></td><td>7-11</td><td><b>Korunum kazanılır</b> (sayı → madde → uzunluk → alan → ağırlık → hacim) · Tersine çevirme · Sınıflama, sıralama · Soyutu anlamaz</td></tr>
+<tr><td>Soyut İşlemler</td><td>11+</td><td>Hipotetik düşünme · <b>Hayali seyirci</b> + <b>kişisel efsane</b></td></tr>
+</table>
+<p><b>Kavramlar:</b> <b>Şema</b> → <b>Özümleme</b> (yeniyi eski şemaya sokma: kediye "hav hav" demek) → <b>Uyum sağlama/Düzenleme</b> (şemayı değiştirme) → <b>Dengeleme</b> (öğrenmenin motoru).</p>
+<div class="tip-box"><b>💡 Okul Öncesi = İşlem Öncesi Dönem.</b> Soruda 3-6 yaş bir çocuk varsa ve "korunumu kazanamadı, tek boyuta odaklandı, canlandırma yaptı" deniyorsa cevap buradadır. Bu dönemde korunum <b>beklenmez</b>, "kazandırmak için alıştırma yaptırdı" seçeneği yanlıştır.</div>
+
+<h4>2) VYGOTSKY</h4>
+<ul>
+<li><b>Yakınsak (yakın) gelişim alanı:</b> Tek başına yapamadığı, <b>yardımla</b> yapabildiği alan → öğretim buraya.</li>
+<li><b>Yapı iskelesi (scaffolding):</b> Destek verilir, sonra <b>yavaşça çekilir</b>.</li>
+<li><b>Dil düşünceden önce gelir</b> (Piaget'in tersi) · <b>Benmerkezci konuşma = içsel konuşmanın öncüsü</b>, işlevseldir · Kültür belirleyicidir.</li>
+</ul>
+
+<h4>3) ERIKSON — Psikososyal (Okul Öncesi Kritik)</h4>
+<table>
+<tr><th>Yaş</th><th>Kriz</th><th>Sağlıklı sonuç</th></tr>
+<tr><td>0-1</td><td>Temel güven ↔ Güvensizlik</td><td>Umut · <b>tutarlı bakım</b></td></tr>
+<tr><td>1-3</td><td><b>Özerklik ↔ Utanç-Şüphe</b></td><td>İrade · tuvalet eğitimi, "ben yaparım"</td></tr>
+<tr><td>3-6</td><td><b>Girişimcilik ↔ Suçluluk</b></td><td>Amaç · <b>soru sorması ve denemesi engellenmemeli</b></td></tr>
+<tr><td>6-12</td><td>Başarı ↔ Aşağılık</td><td>Yeterlik</td></tr>
+<tr><td>12-18</td><td>Kimlik ↔ Rol karmaşası</td><td>Sadakat</td></tr>
+</table>
+<div class="tip-box"><b>💡 Okul öncesi = Girişimcilik/Suçluluk (3-6).</b> Çocuk sürekli soru sorar, dener, karıştırır. Azarlanır ve engellenirse <b>suçluluk</b> gelişir. "Öğretmen çocuğun sorularını geçiştirdi" → girişimciliği baltalar.</div>
+
+<h4>4) KOHLBERG — Ahlaki Gelişim</h4>
+<table>
+<tr><th>Düzey</th><th>Evre</th><th>Mantık</th></tr>
+<tr><td rowspan="2"><b>Gelenek Öncesi</b><br>(okul öncesi burada)</td><td>1. Ceza-itaat</td><td>"Cezalandırılmayayım"</td></tr>
+<tr><td>2. Saf çıkarcılık</td><td>"Bana ne fayda var?" karşılıklılık</td></tr>
+<tr><td rowspan="2">Geleneksel</td><td>3. İyi çocuk</td><td>"Beğensinler, onaylasınlar"</td></tr>
+<tr><td>4. Kanun-düzen</td><td>"Kural kuraldır"</td></tr>
+<tr><td rowspan="2">Gelenek Sonrası</td><td>5. Sosyal sözleşme</td><td>"Yanlış kural değişmeli"</td></tr>
+<tr><td>6. Evrensel ahlak</td><td>"Vicdan kanundan üstün"</td></tr>
+</table>
+<div class="tip-box"><b>💡 Kohlberg Şifresi:</b> Davranışa değil <b>GEREKÇEYE</b> bak. "Yakalanırım" → 1 · "Bana da verir" → 2 · "Ayıplanırım" → 3 · "Yasak" → 4.</div>
+
+<h4>5) FREUD ve Diğerleri</h4>
+<ul>
+<li><b>Freud:</b> Oral(0-1) → Anal(1-3) → <b>Fallik(3-6: Oedipus/Elektra, özdeşim, süperego gelişir)</b> → Gizil(6-12) → Genital. <b>İd-Ego-Süperego</b>. Savunma mekanizmaları: bastırma, yansıtma, yer değiştirme, ödünleme, karşıt tepki, gerileme, yüceltme.</li>
+<li><b>Bronfenbrenner (Ekolojik):</b> <b>Mikro</b> (aile, okul) → <b>Mezo</b> (veli-öğretmen görüşmesi) → <b>Ekzo</b> (annenin iş yeri) → <b>Makro</b> (kültür) → <b>Kronosistem</b> (zaman).</li>
+<li><b>Bowlby/Ainsworth (Bağlanma):</b> <b>Güvenli</b> · <b>Kaygılı-kararsız</b> · <b>Kaçıngan</b> · <b>Dağınık</b>. Güvenli bağlanma tutarlı ve duyarlı bakımdan doğar.</li>
+<li><b>Gardner (Çoklu Zekâ):</b> Sözel, mantıksal-matematiksel, görsel, bedensel, müziksel, sosyal, içsel, doğacı.</li>
+</ul>
+<div class="osym-alert"><b>🚨 Ölümcül Tuzak:</b> <b>Piaget'te benmerkezcilik</b> (2-7, başkasının bakış açısını alamama) ile <b>Vygotsky'de benmerkezci konuşma</b> (işlevsel, içsel konuşmaya dönüşür) farklıdır. Piaget onu <b>eksiklik</b> sayar, Vygotsky <b>araç</b> sayar.</div>
+<div class="banko"><b>🎯 2026 BANKO TAHMİN:</b> 4 yaşındaki çocuk, ayağını çarptığı masaya kızıp "kötü masa, beni çarptı!" diyor. Bu hangi kavramdır?<br><b>Cevap:</b> <b>Animizm (canlandırmacılık)</b> — cansız varlığa canlılık ve niyet atfetme; işlem öncesi dönemin tipik özelliği.</div>
+`},
+{cat:"cocuk", id:"ruhsagligi", icon:"🫂", title:"12. Çocuk Ruh Sağlığı", exp:`
+<h3>Çocuk Ruh Sağlığı</h3>
+<p>50'lik denemede <b>4 soru</b>. Davranış problemleri, uyum sorunları ve öğretmenin doğru tepkisi sorulur.</p>
+
+<h4>1) Sık Görülen Davranış Problemleri</h4>
+<table>
+<tr><th>Problem</th><th>Bilinmesi Gereken</th></tr>
+<tr><td><b>Ayrılık kaygısı</b></td><td>8 aydan itibaren normal · Okula başlarken artar · Kademeli uyum + tutarlı veda</td></tr>
+<tr><td><b>Öfke nöbeti (tantrum)</b></td><td>2-4 yaş normal · Çocuk sakinleşene kadar <b>güvenliği sağlanır</b>, pazarlık edilmez, ödül verilmez · Sonrasında duygu adlandırılır</td></tr>
+<tr><td><b>Parmak emme</b></td><td>Genelde <b>kendiliğinden geçer</b> · Ceza/acı biber <b>kesinlikle yanlış</b> · Nedeni araştırılır (kaygı, sıkılma)</td></tr>
+<tr><td><b>Tırnak yeme</b></td><td>Kaygı belirtisi · Uyarma/ceza artırır</td></tr>
+<tr><td><b>Altını ıslatma (enürezis)</b></td><td>Genelde <b>5 yaş sonrası</b> sorun sayılır · Önce <b>tıbbi neden</b> elenir · <b>Utandırma, cezalandırma, arkadaşlara söyleme yasak</b></td></tr>
+<tr><td><b>Yalan</b></td><td>Okul öncesinde çoğu <b>hayal-gerçek karışması</b> (gerçek yalan değil) · Suçlama değil, gerçeği ayırt etmesine yardım</td></tr>
+<tr><td><b>Saldırganlık/ısırma</b></td><td>Dil yetersizliğinden de olabilir · Davranış durdurulur, <b>duygu adlandırılır</b>, alternatif öğretilir</td></tr>
+<tr><td><b>Kardeş kıskançlığı</b></td><td>Normal · Gerileme (regresyon) görülebilir (yeniden altını ıslatma) · Kıyaslama yasak</td></tr>
+<tr><td><b>Utangaçlık/içe kapanıklık</b></td><td>Zorlama yok, kademeli katılım · "Utangaç" etiketi yapıştırılmaz</td></tr>
+<tr><td><b>Hiperaktivite/DEHB</b></td><td>Tanıyı <b>öğretmen koymaz</b> · Kısa yönerge, ön sıra, hareket molası, net rutin</td></tr>
+<tr><td><b>Seçici konuşmazlık (mutizm)</b></td><td>Evde konuşur, okulda konuşmaz · Zorlama yanlış · Uzman desteği</td></tr>
+</table>
+
+<h4>2) Öğretmenin Altın Kuralları</h4>
+<ul>
+<li><b>Davranışı</b> eleştir, <b>çocuğu</b> değil: "Vurmak canını yakar" ✓ / "Sen çok kötüsün" ✗</li>
+<li><b>Ben dili</b> kullan: "Böyle yapılınca üzülüyorum."</li>
+<li><b>Duyguyu kabul et, davranışı sınırla:</b> "Kızmana anlıyorum ama vurmak yok."</li>
+<li><b>Etiket yapıştırma</b> (yaramaz, utangaç, tembel) — kendini gerçekleştiren kehanete dönüşür.</li>
+<li><b>Kıyaslama ve yarıştırma yok.</b> Ödül-ceza yerine <b>nedeni anlama</b>.</li>
+<li>Davranış <b>kalıcı, yoğun, yaşa uygunsuz</b> ve işlevi bozuyorsa → <b>aileyle iş birliği + uzmana yönlendirme</b>. Öğretmen <b>tanı koymaz, ilaç önermez</b>.</li>
+</ul>
+<div class="osym-alert"><b>🚨 Tuzak:</b> Seçeneklerde "ceza verdi", "arkadaşlarının önünde uyardı", "aileye şikâyet etti", "yaramaz olduğunu söyledi" → hepsi yanlış. Doğru cevap genelde <b>davranışın nedenini araştıran</b> ve <b>çocuğun duygusunu kabul eden</b> seçenektir.</div>
+<div class="banko"><b>🎯 2026 BANKO TAHMİN:</b> Kardeşi doğduktan sonra tuvalet eğitimi tamamlanmış 4 yaşındaki çocuk yeniden altını ıslatmaya başlıyor. Bu hangi savunma mekanizmasıdır?<br><b>Cevap:</b> <b>Gerileme (regresyon)</b> — kaygı karşısında önceki gelişim dönemine ait davranışa dönme.</div>
+`},
+{cat:"cocuk", id:"saglik", icon:"🚑", title:"10. Çocuk Sağlığı ve İlkyardım", exp:`
+<h3>Çocuk Sağlığı ve İlkyardım</h3>
+<p>50'lik denemede <b>3 soru</b>. Burada bilgi <b>kesindir</b>; yorum yoktur, ezber gerekir.</p>
+
+<h4>1) İlkyardımın Temel İlkeleri</h4>
+<ul>
+<li><b>KBK:</b> <b>K</b>oru — <b>B</b>ildir (<b>112</b>) — <b>K</b>urtar. Önce <b>olay yeri güvenliği</b>.</li>
+<li>İlkyardımcı <b>ilaç vermez</b>, <b>bilinci kapalıya ağızdan bir şey verilmez</b>.</li>
+<li>Gereksiz hareket ettirilmez (özellikle düşme/omurga şüphesinde).</li>
+<li><b>ABC:</b> Hava yolu (Airway) → Solunum (Breathing) → Dolaşım (Circulation).</li>
+</ul>
+
+<h4>2) Acil Durumlar — Doğru Müdahale</h4>
+<table>
+<tr><th>Durum</th><th>Yapılacak</th><th>YAPILMAYACAK</th></tr>
+<tr><td><b>Boğulma (yabancı cisim)</b></td><td>Öksürebiliyorsa <b>öksürmeye teşvik et</b> · Öksüremiyorsa <b>Heimlich</b> (1 yaş üstü) · Bebekte <b>5 sırt vuruşu + 5 göğüs baskısı</b></td><td>Körlemesine parmakla ağzı karıştırma</td></tr>
+<tr><td><b>Yanık</b></td><td><b>15-20 dk soğuk/ılık akan su</b> · Temiz bezle ört</td><td><b>Diş macunu, yoğurt, salça, buz</b> · Bülü patlatma</td></tr>
+<tr><td><b>Kanama</b></td><td>Temiz bezle <b>doğrudan basınç</b> · Yükselt</td><td>Turnike (son çare)</td></tr>
+<tr><td><b>Burun kanaması</b></td><td><b>Öne eğ</b>, burun kanatlarına 5 dk bas</td><td><b>Başı geriye atma</b> (kan mideye kaçar)</td></tr>
+<tr><td><b>Kırık/çıkık</b></td><td>Olduğu gibi <b>sabitle (atel)</b></td><td><b>Yerine oturtmaya çalışma</b></td></tr>
+<tr><td><b>Havale (ateşli nöbet)</b></td><td>Yan yatır, çevreyi güvenli kıl, süreyi ölç</td><td><b>Ağzına bir şey sokma</b>, tutup engelleme</td></tr>
+<tr><td><b>Zehirlenme</b></td><td>112 · Maddeyi yanına al</td><td><b>Kusturma</b> (özellikle asit/baz, petrol)</td></tr>
+<tr><td><b>Bayılma</b></td><td>Sırtüstü yatır, <b>ayakları yukarı kaldır</b></td><td>Ayağa kaldırma, kolonya koklatma</td></tr>
+<tr><td><b>Göze yabancı cisim</b></td><td>Bol suyla yıka</td><td>Ovuşturma, batmış cismi çıkarma</td></tr>
+</table>
+<div class="tip-box"><b>💡 En Çok Sorulan Üç Kesin Bilgi:</b> Yanıkta <b>diş macunu/yoğurt YOK</b>, sadece <b>soğuk su</b>. Burun kanamasında <b>baş öne</b>, geriye değil. Havalede <b>ağza hiçbir şey sokulmaz</b>.</div>
+
+<h4>3) Sağlık ve Beslenme</h4>
+<ul>
+<li><b>Bulaşıcı hastalıklar:</b> Suçiçeği, kızamık, kabakulak, kızıl, el-ayak-ağız. Şüphede çocuk <b>ayrılır, aile aranır</b>.</li>
+<li><b>En etkili korunma: EL YIKAMA.</b></li>
+<li><b>Aşı takvimi</b> takip edilir; öğretmen aşı kartını izler.</li>
+<li><b>Beslenme:</b> Zorla yedirmek yanlış · Çocuk <b>ne kadar</b> yiyeceğine kendi karar verir, öğretmen <b>ne sunulacağına</b> karar verir · Yemek <b>ödül/ceza aracı yapılmaz</b> ("bitirirsen tatlı") · Yeni yiyecek <b>tekrar tekrar sunulur</b>.</li>
+<li><b>Kazalardan korunma:</b> Prizler kapalı, küçük parçalar (boğulma), sıcak sıvılar, temizlik ürünleri kilitli.</li>
+</ul>
+<div class="osym-alert"><b>🚨 Tuzak:</b> "Yemeği bitirirse oyun oynayacağını söyledi" → yemek pekiştireç/ceza aracı yapılamaz, yeme sorununu artırır. Ayrıca yanıkta "buz koydu" da yanlıştır (doku hasarı).</div>
+<div class="banko"><b>🎯 2026 BANKO TAHMİN:</b> Sıcak çayı üzerine döken çocuğa öğretmen ilk ne yapmalı?<br><b>Cevap:</b> Yanan bölgeyi <b>15-20 dakika soğuk/ılık akan su</b> altında tutmak; diş macunu, yoğurt, buz kesinlikle kullanılmaz.</div>
+`},
+{cat:"aile", id:"annebaba", icon:"👨‍👩‍👧", title:"14. Anne-Baba Eğitimi ve Aile Katılımı", exp:`
+<h3>Anne-Baba Eğitimi ve Aile Katılımı</h3>
+<p>Okul öncesinde aile katılımı <b>seçenek değil, programın parçasıdır</b>. 50'lik denemede <b>3 soru</b>.</p>
+
+<h4>1) Anne-Baba Tutumları (Baumrind) — Kesin Ezber</h4>
+<table>
+<tr><th>Tutum</th><th>Kontrol</th><th>Sıcaklık</th><th>Çocukta Sonuç</th></tr>
+<tr><td><b>Demokratik (yetkin/otoriteci)</b></td><td>Yüksek</td><td>Yüksek</td><td><b>EN OLUMLU</b> · Öz-güvenli, öz-denetimli, sosyal, sorumlu</td></tr>
+<tr><td><b>Otoriter (baskıcı)</b></td><td>Yüksek</td><td>Düşük</td><td>İtaatkâr ama <b>öz-güvensiz</b>, içe kapanık ya da saldırgan, dışarıda kural tanımaz</td></tr>
+<tr><td><b>İzin verici (gevşek/hoşgörülü)</b></td><td>Düşük</td><td>Yüksek</td><td><b>Sorumsuz</b>, dürtüsel, kural tanımaz, doyumu erteleyemez</td></tr>
+<tr><td><b>İlgisiz (ihmalkâr)</b></td><td>Düşük</td><td>Düşük</td><td><b>EN OLUMSUZ</b> · Bağlanma sorunu, düşük benlik</td></tr>
+<tr><td><b>Aşırı koruyucu</b></td><td>Yüksek</td><td>Aşırı</td><td>Bağımlı, girişimden korkan, "ben yapamam"</td></tr>
+<tr><td><b>Tutarsız</b></td><td>Değişken</td><td>Değişken</td><td>Kaygılı, neyin doğru olduğunu bilemeyen</td></tr>
+</table>
+<div class="tip-box"><b>💡 Şifre:</b> İki eksen var — <b>kontrol</b> ve <b>sevgi/sıcaklık</b>. İkisi de yüksek → <b>demokratik</b> (hedef). Kontrol var sevgi yok → <b>otoriter</b>. Sevgi var kontrol yok → <b>izin verici</b>. İkisi de yok → <b>ilgisiz</b>.</div>
+
+<h4>2) Aile Katılımı Türleri</h4>
+<ul>
+<li><b>Eğitime katılım:</b> Sınıfta etkinlik yapma, mesleğini tanıtma, kitap okuma.</li>
+<li><b>Ev ziyaretleri</b>, <b>bireysel görüşme</b>, <b>grup toplantıları</b>.</li>
+<li><b>Yazılı iletişim:</b> Bülten, pano, gelişim raporu, mesaj defteri.</li>
+<li><b>Karar süreçlerine katılım:</b> Okul aile birliği.</li>
+<li><b>Evde eğitim etkinlikleri:</b> Eve gönderilen aile katılım çalışmaları.</li>
+<li><b>Gönüllülük</b>, <b>anne-baba eğitim programları</b> (AÇEV AEP/ABEP gibi).</li>
+</ul>
+
+<h4>3) Öğretmen-Veli İletişimi</h4>
+<ul>
+<li><b>Olumsuzla başlanmaz.</b> Önce çocuğun güçlü yanı, sonra gelişim alanı.</li>
+<li><b>Etiket ve tanı yok:</b> "Oğlunuz hiperaktif" ✗ → "Sınıfta oturmakta zorlanıyor, birlikte bakalım" ✓</li>
+<li>Görüşme <b>çocuğun yanında</b> ve <b>kapı önünde</b> yapılmaz.</li>
+<li><b>Gizlilik</b> esastır; başka çocuklarla <b>kıyaslanmaz</b>.</li>
+<li>Veli <b>suçlanmaz</b>; ortak bir problem tanımı ve <b>somut plan</b> kurulur.</li>
+<li>Aile katılımı <b>her ailenin koşuluna göre</b> esnetilir (çalışan veli, okuma-yazma bilmeyen veli).</li>
+</ul>
+<div class="osym-alert"><b>🚨 Tuzak:</b> "Öğretmen veliye çocuğun sorunlarını sıraladı ve uzmana gitmesini söyledi" → suçlayıcı ve etiketleyici. Doğru cevap <b>güçlü yanla başlayan, iş birliği kuran, somut öneri veren</b> seçenektir.</div>
+<div class="banko"><b>🎯 2026 BANKO TAHMİN:</b> Kural koyan ama gerekçesini açıklayan, çocuğun görüşünü alan, sıcak ve destekleyici anne-baba hangi tutumdadır ve çocukta ne gelişir?<br><b>Cevap:</b> <b>Demokratik tutum</b> → öz-güven, öz-denetim ve sosyal sorumluluk gelişir.</div>
+`},
+{cat:"aile", id:"haklar", icon:"⚖️", title:"15. Çocuk Hakları", exp:`
+<h3>Çocuk Hakları</h3>
+<p>50'lik denemede <b>2 soru</b>. Kaynak: <b>BM Çocuk Haklarına Dair Sözleşme (1989)</b>, Türkiye <b>1995</b>'te onayladı.</p>
+
+<h4>1) Temel Bilgiler</h4>
+<ul>
+<li><b>Çocuk kimdir?</b> Sözleşmeye göre <b>18 yaşını doldurmamış</b> herkes.</li>
+<li><b>4 Temel İlke</b> (ezber şart):
+<ol>
+<li><b>Ayrım gözetmeme</b> (m.2)</li>
+<li><b>Çocuğun yüksek yararı</b> (m.3) — tüm kararlarda <b>öncelikli ölçüt</b></li>
+<li><b>Yaşama ve gelişme hakkı</b> (m.6)</li>
+<li><b>Katılım / görüşlerine saygı</b> (m.12) — çocuk kendini ilgilendiren konularda görüş bildirir</li>
+</ol></li>
+</ul>
+
+<h4>2) Hakların Sınıflandırılması (4 Grup)</h4>
+<table>
+<tr><th>Grup</th><th>İçerik</th></tr>
+<tr><td><b>Yaşama hakları</b></td><td>Yaşam, beslenme, barınma, sağlık</td></tr>
+<tr><td><b>Gelişme hakları</b></td><td><b>Eğitim</b>, <b>oyun ve dinlenme</b>, kültürel yaşam, bilgi edinme</td></tr>
+<tr><td><b>Korunma hakları</b></td><td>İhmal, istismar, şiddet, çocuk işçiliği, savaş ve sömürüden korunma</td></tr>
+<tr><td><b>Katılım hakları</b></td><td>Görüş bildirme, ifade, örgütlenme, düşünce ve din özgürlüğü</td></tr>
+</table>
+<div class="tip-box"><b>💡 Sık Sorulan:</b> <b>Oyun bir haktır</b> (m.31), lütuf değildir. "Oyun hakkını ceza olarak elinden aldı" → <b>hak ihlali</b>dir. Bu, ÖABT'nin favori sorusudur.</div>
+
+<h4>3) İhmal ve İstismar</h4>
+<table>
+<tr><th>Tür</th><th>Açıklama</th></tr>
+<tr><td><b>İhmal</b></td><td><b>Yapılması gerekenin yapılmaması</b> (pasif): beslenmeme, sağlık ihmali, gözetimsiz bırakma, eğitimden yoksun bırakma</td></tr>
+<tr><td><b>Fiziksel istismar</b></td><td>Dayak, yaralama · Belirti: açıklanamayan/tekrarlayan morluk, yanık izi, doktora geç götürme</td></tr>
+<tr><td><b>Duygusal istismar</b></td><td>Aşağılama, tehdit, sürekli eleştiri, sevgiyi koşula bağlama · <b>En yaygın ama en zor fark edileni</b></td></tr>
+<tr><td><b>Cinsel istismar</b></td><td>Yaşına uygun olmayan cinsel bilgi/davranış, ani içe kapanma, gerileme</td></tr>
+<tr><td><b>Ekonomik istismar</b></td><td>Çocuk işçiliği, dilendirme</td></tr>
+</table>
+<h4>4) Öğretmenin Sorumluluğu — Şüphe Durumunda</h4>
+<ul>
+<li><b>Bildirim zorunludur.</b> Öğretmen şüphelendiğinde <b>ihbar etmekle yükümlüdür</b> (kanıtlamak zorunda değildir).</li>
+<li><b>Çocuğu sorguya çekmez</b>, yönlendirici soru sormaz, olayı tekrar tekrar anlattırmaz.</li>
+<li><b>"Kimseye söyleme" sözü vermez</b> — tutamayacağı bir sözdür.</li>
+<li>Çocuğa <b>inanır</b>, suçlamaz ("neden söylemedin?" demez), <b>sakin kalır</b>.</li>
+<li><b>Gizliliğe</b> uyar, olayı öğretmenler odasında konuşmaz.</li>
+<li>İdare + rehberlik + gerekiyorsa <b>183 / kolluk / ASHB</b>.</li>
+</ul>
+<div class="osym-alert"><b>🚨 Tuzak:</b> "Öğretmen emin olmadığı için beklemeye karar verdi" → <b>yanlış</b>. Şüphe bildirim için yeterlidir; kanıt toplamak öğretmenin işi değildir. Ayrıca "aileye sordu" da yanlıştır (istismarcı aile içindeyse çocuğu riske atar).</div>
+<div class="banko"><b>🎯 2026 BANKO TAHMİN:</b> Öğretmen, gürültü yapan çocuğu teneffüste oyundan mahrum bırakıyor. Bu, Çocuk Hakları Sözleşmesi açısından nedir?<br><b>Cevap:</b> <b>Hak ihlali</b> — oyun ve dinlenme (m.31) bir haktır, ödül ya da ceza aracı yapılamaz.</div>
+`}
+];
+
+
+// ==================== SABİT 50'LİK DENEME ====================
+const EXAM_50 = [
+{topic:"Gelişim",q:"Gelişimin baştan ayağa doğru ilerlemesini (önce baş-boyun kontrolü, sonra oturma, en son yürüme) ifade eden ilke hangisidir?",options:["Proksimodistal","Sefalokaudal","Bütünsellik","Süreklilik","Genelden özele"],correct:1,exp:"Baştan ayağa yön = sefalokaudal ilke."},
+{topic:"Gelişim",q:"'Güneş beni takip ediyor, o yüzden yürüyorum' diyen bir çocuk işlem öncesi dönemin hangi özelliğini gösterir?",options:["Yapaycılık","Animizm","Benmerkezcilik","Korunum","Sınıflama"],correct:1,exp:"Cansız varlığa (güneşe) canlılık/niyet atfetme = animizm."},
+{topic:"Gelişim",q:"Erikson'a göre 3-6 yaş okul öncesi çocuğun içinde bulunduğu psikososyal dönem hangisidir?",options:["Güvene karşı güvensizlik","Özerkliğe karşı utanç","Girişimciliğe karşı suçluluk","Çalışkanlığa karşı yetersizlik","Kimliğe karşı rol karmaşası"],correct:2,exp:"3-6 yaş = girişimciliğe karşı suçluluk."},
+{topic:"Gelişim",q:"Bir çocuk aynı miktar suyu ince uzun bardağa boşaltınca 'daha çok su oldu' der. Bu, hangi kavramın kazanılmadığını gösterir?",options:["Sınıflama","Sıralama","Miktar (sıvı) korunumu","Nesne sürekliliği","Örüntü"],correct:2,exp:"Kabın şekli değişince miktarı sabit görememe = korunum eksikliği."},
+{topic:"Gelişim",q:"Piaget'nin ahlak gelişiminde okul öncesi çocuğun kuralları değişmez, otoriteyi mutlak gördüğü evre hangisidir?",options:["Özerk ahlak","Otonom ahlak","Dışa bağımlı (heteronom) ahlak","Sosyal sözleşme","Evrensel ilke"],correct:2,exp:"Kuralı değişmez, otoriteyi mutlak sayan evre = dışa bağımlı (heteronom) ahlak."},
+{topic:"Gelişim",q:"Aşağıdakilerden hangisi gelişimin genel ilkelerinden biri DEĞİLDİR?",options:["Gelişim süreklidir","Gelişim baştan ayağa ilerler","Her çocuk aynı hızda gelişir","Gelişim bir bütündür","Gelişimde kritik dönemler vardır"],correct:2,exp:"Her çocuk KENDİNE ÖZGÜ hızda gelişir; 'aynı hızda' yanlıştır."},
+{topic:"Gelişim",q:"Nesne sürekliliği kavramı hangi bilişsel dönemde kazanılır?",options:["Duyusal-motor","İşlem öncesi","Somut işlemler","Soyut işlemler","Sezgisel dönem"],correct:0,exp:"Gözden kaybolan nesnenin var olmaya devam ettiğini kavrama = duyusal-motor dönemde."},
+{topic:"Gelişim",q:"'İki nesneyi hem renk hem şekil bakımından aynı anda sınıflayamama', işlem öncesi dönemin hangi sınırlılığıyla ilişkilidir?",options:["Animizm","Odaklanma (tek boyuta takılma)","Yapaycılık","Benmerkezcilik","Tersinmezlik"],correct:1,exp:"Tek bir boyuta odaklanıp diğerini göz ardı etme = odaklanma (centration)."},
+{topic:"Oyun",q:"İki çocuk aynı masada oturup aynı hamurla oynamakta ancak birbirleriyle hiç konuşmamakta, etkileşime girmemektedir. Bu hangi oyun evresidir?",options:["Yalnız oyun","Paralel oyun","Birlikte oyun","İşbirlikli oyun","İzleyici oyun"],correct:1,exp:"Yan yana, aynı materyal ama etkileşim yok = paralel oyun."},
+{topic:"Oyun",q:"Bir grup çocuk rol dağıtıp 'sen doktor, ben hemşire' diyerek ortak bir hastane oyununu birlikte kurup yürütmektedir. Bu hangi oyun evresidir?",options:["Paralel","Birlikte (çağrışımlı)","İşbirlikli","Yalnız","İzleyici"],correct:2,exp:"Rol dağılımı + ortak amaç = işbirlikli oyun."},
+{topic:"Oyun",q:"Bir çocuğun sopayı at, kutuyu araba gibi kullandığı oyun türü, Smilansky'ye göre hangisidir?",options:["İşlevsel oyun","Yapı-inşa oyunu","Dramatik (sembolik) oyun","Kurallı oyun","Alıştırma oyunu"],correct:2,exp:"Bir nesneyi başka bir şeymiş gibi kullanma = dramatik/sembolik oyun."},
+{topic:"Oyun",q:"Aşağıdakilerden hangisi oyunun çocuğun gelişimine katkılarından biri olarak EN AZ ilişkilidir?",options:["Sosyal beceriler","Dil gelişimi","Problem çözme","Boy uzamasının hızlanması","Duygusal boşalım"],correct:3,exp:"Oyun boy uzamasını doğrudan hızlandırmaz; diğerleri oyunun katkılarıdır."},
+{topic:"Program",q:"Aşağıdakilerden hangisi MEB okul öncesi eğitim programının özelliklerinden biri DEĞİLDİR?",options:["Çocuk merkezlidir","Sarmaldır","Esnektir","Konu merkezli ve katıdır","Oyun temellidir"],correct:3,exp:"Program çocuk merkezli ve esnektir; 'konu merkezli ve katı' yanlıştır."},
+{topic:"Program",q:"Reggio Emilia yaklaşımında 'çevrenin üçüncü öğretmen' sayılmasının nedeni aşağıdakilerden hangisidir?",options:["Öğretmen sayısının üç olması","Ortamın kendisinin öğrenmeyi uyarması","Ailenin öğretmen olması","Teknolojinin öğretmesi","Müdürün öğretmesi"],correct:1,exp:"Reggio'da özenle düzenlenen çevre öğrenmeyi uyardığı için 3. öğretmendir."},
+{topic:"Program",q:"Waldorf yaklaşımıyla ilgili aşağıdakilerden hangisi doğrudur?",options:["Teknolojik oyuncaklar yoğun kullanılır","Yüz hatları belirgin plastik bebekler kullanılır","Ritim, doğa ve hayal gücü esastır","Erken akademik öğretim önceliklidir","Karma yaş kesinlikle yasaktır"],correct:2,exp:"Waldorf'ta ritim, doğa, hayal gücü öndedir; teknoloji/plastik oyuncak kullanılmaz."},
+{topic:"Program",q:"Öğretmenin etkinlikler arası beklemeyi ve dağınıklığı azaltmak için kullandığı kısa şarkı, tekerleme ve parmak oyunlarına ne ad verilir?",options:["Serbest zaman","Geçiş etkinlikleri","Değerlendirme","Kapanış","Güne başlama"],correct:1,exp:"Etkinlikler arası köprü kuran kısa uygulamalar = geçiş etkinlikleri."},
+{topic:"Kuramlar",q:"Bronfenbrenner'e göre babanın iş yerinin, çocuğu doğrudan içinde olmadığı hâlde dolaylı etkilemesi hangi sisteme örnektir?",options:["Mikrosistem","Mezosistem","Ekzosistem","Makrosistem","Kronosistem"],correct:2,exp:"Çocuğu dolaylı etkileyen, içinde bulunmadığı ortam = ekzosistem."},
+{topic:"Kuramlar",q:"Gardner'ın çoklu zeka kuramına göre haritaları kolay okuyan, yapbozda usta bir çocuk hangi zeka alanında güçlüdür?",options:["Sözel-dilsel","Mantıksal-matematiksel","Görsel-uzamsal","Müziksel","İçsel"],correct:2,exp:"Harita/yapboz/mekân becerisi = görsel-uzamsal zeka."},
+{topic:"Kuramlar",q:"Davranışçı kurama göre öğrenmenin temeli aşağıdakilerden hangisidir?",options:["Zihinsel şemaların yapılandırılması","Uyarıcı-tepki bağı ve pekiştireç","Gözlem ve model alma","İçgüdüler","Sezgi"],correct:1,exp:"Davranışçılıkta öğrenme uyarıcı-tepki + pekiştireç ile açıklanır."},
+{topic:"Okuryazarlık",q:"Aşağıdakilerden hangisi fonolojik farkındalık etkinliğine ÖRNEK DEĞİLDİR?",options:["Kafiyeli kelime bulma","Kelimeyi hecelerine ayırma","Kelimenin ilk sesini söyleme","Harfleri deftere yazdırma","Aynı sesle başlayan kelimeleri eşleme"],correct:3,exp:"Harf yazdırma yazıyla ilgilidir ve okul öncesinde yapılmaz; fonolojik farkındalık işitseldir."},
+{topic:"Okuryazarlık",q:"Okula hazırbulunuşluğun 'üç ayağı' aşağıdakilerden hangisidir?",options:["Çocuk-öğretmen-müfettiş","Hazır çocuk-hazır aile-hazır okul","Zeka-dikkat-bellek","Aile-akran-medya","Sağlık-beslenme-uyku"],correct:1,exp:"Hazırbulunuşluk hazır çocuk + hazır aile + hazır okul üçlüsüdür."},
+{topic:"Okuryazarlık",q:"Yetişkinin okurken durup açık uçlu sorular sorduğu, çocuğu konuşmaya kattığı ve kelime dağarcığını en çok geliştiren okuma tekniği hangisidir?",options:["Sessiz okuma","Etkileşimli (diyaloğa dayalı) kitap okuma","Koro hâlinde okuma","Ezber okuma","Hızlı okuma"],correct:1,exp:"Soru-cevaplı, çocuğu katan okuma = etkileşimli okuma."},
+{topic:"Okuryazarlık",q:"Okul öncesinde okuma-yazmaya ilişkin aşağıdakilerden hangisi UYGUNDUR?",options:["Harfleri dikte ettirmek","Heceleyerek okuma öğretmek","Ses oyunları ve öykü etkinlikleriyle ön beceri geliştirmek","Çocuğa yazı yazdırmak","İmla kurallarını öğretmek"],correct:2,exp:"Formal okuma-yazma yasaktır; sadece ön beceriler (ses oyunu, öykü) desteklenir."},
+{topic:"Fen",q:"Bir çocuğun tabaktaki bisküvi kırıntılarına bakarak 'burada biri bisküvi yemiş' demesi hangi bilimsel süreç becerisidir?",options:["Tahmin","Çıkarım","Gözlem","Ölçme","İletişim"],correct:1,exp:"Geride kalan izden geçmişteki olayı bulmak = çıkarım."},
+{topic:"Fen",q:"Okul öncesi fen eğitiminde ölçme yapılırken aşağıdakilerden hangisi kullanılır?",options:["Metre ve cetvel","Dijital terazi","Karış, adım, ip gibi standart olmayan birimler","Termometre","Barometre"],correct:2,exp:"Okul öncesinde standart olmayan birimler (karış, adım, ip) kullanılır."},
+{topic:"Fen",q:"Fen etkinliğinde öğretmenin rolü için aşağıdakilerden hangisi doğrudur?",options:["Bilgiyi doğrudan aktarır","Deneyi çocuk yerine yapıp gösterir","Açık uçlu sorularla çocuğun keşfetmesine rehberlik eder","Doğru cevabı hemen söyler","Ezber yaptırır"],correct:2,exp:"Öğretmen rehberdir; açık uçlu sorularla çocuğu keşfe yönlendirir."},
+{topic:"Matematik",q:"Bir çocuğun 5'e kadar saydıktan sonra 'toplam 5 tane var' diyebilmesi hangi sayma ilkesini gösterir?",options:["Birebir eşleme","Sabit sıra","Kardinallik (son sayı)","Soyutlama","Sıra bağımsızlığı"],correct:2,exp:"Son sayının toplam miktarı ifade ettiğini bilmek = kardinallik."},
+{topic:"Matematik",q:"'ABAB, kırmızı-mavi-kırmızı-mavi' şeklinde tekrar eden dizilere ne ad verilir ve hangi matematiksel düşünmenin temelidir?",options:["Sıralama-ölçme","Örüntü-cebir","Sınıflama-geometri","Eşleştirme-sayı","Korunum-veri"],correct:1,exp:"Tekrar eden düzenli diziler örüntüdür; cebirsel düşünmenin temelidir."},
+{topic:"Matematik",q:"NCTM standartlarına göre aşağıdakilerden hangisi 'süreç standartları' arasında YER ALMAZ?",options:["Problem çözme","İletişim","Akıl yürütme","Geometri","İlişkilendirme"],correct:3,exp:"Geometri bir içerik standardıdır, süreç standardı değildir."},
+{topic:"Sanat",q:"Lowenfeld'e göre çizimlerde 'yer çizgisinin belirdiği ve röntgen (saydam) çizimin görüldüğü' evre hangisidir?",options:["Karalama","Şema öncesi","Şematik","Gerçekçilik","Sözde natüralizm"],correct:2,exp:"Yer çizgisi + saydam çizim = şematik evre (7-9)."},
+{topic:"Sanat",q:"Okul öncesi sanat eğitiminde değerlendirmede öncelik hangisine verilmelidir?",options:["Ürünün estetik güzelliğine","Çizimin gerçeğe benzemesine","Çocuğun sürecine ve çabasına","Renklerin taşmamasına","Öğretmen modeline uygunluğa"],correct:2,exp:"Sanat eğitiminde ürün değil süreç ve çaba değerlendirilir."},
+{topic:"Müzik",q:"'En mükemmel çalgı insan sesidir' diyerek el işaretleriyle solfej öğretimini merkeze alan kuramcı kimdir?",options:["Carl Orff","Zoltan Kodaly","Suzuki","Dalcroze","Gordon"],correct:1,exp:"İnsan sesi + el işaretiyle solfej = Kodaly."},
+{topic:"Müzik",q:"Müziği zihinden çok bedenle, ritmik hareket ve jimnastikle hissettirmeyi esas alan yaklaşım hangisidir?",options:["Orff","Kodaly","Dalcroze","Suzuki","Willems"],correct:2,exp:"Bedensel hareket/ritmik jimnastik (eurhythmics) = Dalcroze."},
+{topic:"Drama",q:"Drama ile tiyatro arasındaki temel fark aşağıdakilerden hangisidir?",options:["Drama sonuç, tiyatro süreç odaklıdır","Drama süreç odaklıdır ve seyirci için yapılmaz","Dramada yazılı senaryo şarttır","Tiyatroda doğaçlama esastır","İkisi de aynıdır"],correct:1,exp:"Drama süreç odaklı, seyircisiz ve doğaçlamaya dayalıdır; tiyatro ürün/seyirci odaklıdır."},
+{topic:"Drama",q:"Dramanın aşamaları aşağıdakilerden hangisinde doğru sırayla verilmiştir?",options:["Canlandırma-Isınma-Değerlendirme","Isınma-Canlandırma-Değerlendirme","Değerlendirme-Isınma-Canlandırma","Isınma-Değerlendirme-Canlandırma","Canlandırma-Değerlendirme-Isınma"],correct:1,exp:"Doğru sıra: Isınma → Canlandırma → Değerlendirme."},
+{topic:"Sağlık",q:"Ani ses veya düşme hissinde bebeğin kollarını iki yana açıp sonra kendine doğru toplaması hangi reflekstir?",options:["Babinski","Moro","Arama","Yakalama","Tonik boyun"],correct:1,exp:"Ani uyaranla kolları açıp toplama (irkilme) = Moro refleksi."},
+{topic:"Sağlık",q:"Yemek yerken öksürebilen, nefes alabilen ancak rahatsız görünen bir çocukta (kısmi tıkanma) öğretmenin yapması gereken nedir?",options:["Hemen Heimlich uygulamak","Sırta kuvvetle vurmak","Çocuğun öksürmesini desteklemek ve gözlemlemek","Su içirmek","Parmakla boğazı yoklamak"],correct:2,exp:"Kısmi tıkanmada çocuk öksürebiliyorsa müdahale edilmez, öksürmesi desteklenir."},
+{topic:"Sağlık",q:"Sıcak su ile hafif yanan bir çocuğa ilk yardımda ne yapılmalıdır?",options:["Yanığa diş macunu sürmek","Yoğurt sürmek","Temiz soğuk/ılık su altında tutmak","Buz bastırmak","Su toplamışsa patlatmak"],correct:2,exp:"Yanıkta yalnızca temiz soğuk/ılık su; macun/yoğurt/buz zararlıdır."},
+{topic:"Ruh Sağlığı",q:"'Yabancı Durum' deneyinde anne odaya döndüğünde çocuğun anneyi görmezden gelip oyununa devam etmesi hangi bağlanma stilidir?",options:["Güvenli","Kaçıngan","Kaygılı-dirençli","Dağınık","Simbiyotik"],correct:1,exp:"Anneyi görmezden gelip ilgisiz kalmak = kaçıngan bağlanma."},
+{topic:"Ruh Sağlığı",q:"Otizm spektrum bozukluğunun en temel belirtisi aşağıdakilerden hangisidir?",options:["Aşırı hareketlilik","Sosyal iletişim ve etkileşimde yetersizlik","Yüksek zeka","Dil gelişiminde erkenlik","Aşırı sosyallik"],correct:1,exp:"OSB'nin çekirdek belirtisi sosyal iletişim-etkileşim yetersizliğidir."},
+{topic:"Ruh Sağlığı",q:"Bir çocuğun öğretmenine kızdığı öfkeyi eve gidip kardeşine yöneltmesi hangi savunma mekanizmasıdır?",options:["Yansıtma","Yer değiştirme (deplasman)","Gerileme","Bastırma","Ödünleme"],correct:1,exp:"Öfkeyi asıl kaynaktan güvenli bir hedefe aktarma = yer değiştirme."},
+{topic:"Ruh Sağlığı",q:"Beş yaşındaki bir çocukta gündüz kontrolü olmasına rağmen tekrarlayan istemsiz idrar kaçırma durumuna ne ad verilir?",options:["Enkoprezis","Enürezis","Tik","Ekolali","Mutizm"],correct:1,exp:"İstemsiz idrar kaçırma = enürezis (dışkı için enkoprezis)."},
+{topic:"Edebiyat",q:"Okul öncesi kitaplarının kağıdı için aşağıdakilerden hangisi doğrudur?",options:["Parlak (kuşe) olmalı","Mat ve kaliteli (1. hamur) olmalı","İnce ve şeffaf olmalı","Renkli fon kağıdı olmalı","Gazete kağıdı olmalı"],correct:1,exp:"Parlak kağıt gözü yorar; kağıt mat ve 1. hamur olmalıdır."},
+{topic:"Edebiyat",q:"Hayvan kahramanlar aracılığıyla ders/öğüt veren kısa öykü türü aşağıdakilerden hangisidir?",options:["Masal","Fabl","Efsane","Destan","Ninni"],correct:1,exp:"Hayvan kahramanlarla ders veren tür = fabl."},
+{topic:"Anne-Baba",q:"Öğretmenin velilere aylık bülten göndermesi ve panoya menü asması, Epstein'e göre hangi aile katılımı türüdür?",options:["Gönüllülük","İletişim (bilgilendirme)","Karar verme","Evde öğrenme","Toplumla işbirliği"],correct:1,exp:"Tek yönlü bilgi aktarımı (bülten, pano) = iletişim katılımı."},
+{topic:"Anne-Baba",q:"Sevgi ve sıcaklığı yüksek ancak hiçbir kural ve sınır koymayan, çocuğun her istediğini yapan tutum hangisidir?",options:["Demokratik","Otoriter","İzin verici (hoşgörülü)","İhmalkâr","Tutarsız"],correct:2,exp:"Yüksek sevgi + sıfır sınır = izin verici tutum."},
+{topic:"Anne-Baba",q:"Velinin sınıfa gelip kendi mesleğini çocuklara tanıtması hangi aile katılımı türüne örnektir?",options:["İletişim","Gönüllülük","Karar verme","Ev ebeveynliği","Bilgilendirme"],correct:1,exp:"Velinin sınıfta etkinliğe katılması = gönüllülük."},
+{topic:"Çocuk Hakları",q:"BM Çocuk Hakları Sözleşmesi'ne göre 'her karar alınırken çocuğun en iyi çıkarının önce gelmesi' hangi temel ilkedir?",options:["Ayrım gözetmeme","Çocuğun yüksek yararı","Katılım","Yaşama-gelişme","İfade özgürlüğü"],correct:1,exp:"Çocukla ilgili kararda en iyi çıkarı önceleme = çocuğun yüksek yararı ilkesi."},
+{topic:"Çocuk Hakları",q:"BM Çocuk Hakları Sözleşmesi'ne göre (daha erken reşit olma hâli hariç) kaç yaşına kadar herkes çocuk sayılır?",options:["12","15","16","18","21"],correct:3,exp:"Sözleşmeye göre 18 yaşına kadar herkes çocuktur."},
+{topic:"Kuramlar",q:"Maslow'un ihtiyaçlar hiyerarşisine göre bir çocuğun okulda öğrenmeye odaklanabilmesi için öncelikle hangi ihtiyaçlarının karşılanması gerekir?",options:["Kendini gerçekleştirme","Saygınlık","Estetik","Fizyolojik ve güvenlik","Bilme-anlama"],correct:3,exp:"Piramidin tabanındaki fizyolojik ve güvenlik ihtiyaçları karşılanmadan üst düzey öğrenmeye geçilemez."}
+];
+
+// ==================== 2026 BANKO TAHMİN ====================
+const PREDICT_2026 = [
+{topic:"Gelişim",q:"Ali, annesiyle telefonda konuşurken karşı taraftan görünmediği hâlde eliyle işaret ederek 'İşte bu kadar büyük!' der. Bu davranış işlem öncesi dönemin hangi özelliğini yansıtır?",options:["Animizm","Benmerkezcilik","Korunum","Tersinmezlik","Yapaycılık"],correct:1,exp:"Karşıdakinin kendi gördüğünü göremeyeceğini fark edememesi = benmerkezcilik."},
+{topic:"Oyun",q:"Bir çocuk parkta oturup diğer çocukların kaydıraktaki oyununu dikkatle izler, sorular sorar ama oyuna katılmaz. Parten'e göre bu hangi oyun evresidir?",options:["Yalnız oyun","Paralel oyun","İzleyici (seyirci) oyun","Birlikte oyun","İşbirlikli oyun"],correct:2,exp:"İzler, soru sorar ama katılmaz → izleyici (seyirci) oyun."},
+{topic:"Fen",q:"Öğretmen 'Bakalım hangi cisimler suda batacak, hangileri yüzecek? Önce tahmininizi söyleyin, sonra deneyelim.' der. Öğretmen öncelikle hangi süreç becerisini kullandırmaktadır?",options:["Çıkarım","Sınıflama","Tahmin (yordama)","Ölçme","İletişim"],correct:2,exp:"Deneyden ÖNCE ne olacağını öngörmek = tahmin (yordama)."},
+{topic:"Matematik",q:"Aynı sayıda bozuk parayı, öğretmen aralarını açarak dizince çocuk 'Bu sırada daha çok para var' der. Bu, hangi kavramın henüz kazanılmadığını gösterir?",options:["Birebir eşleme","Sayı korunumu","Sıralama","Örüntü","Kardinallik"],correct:1,exp:"Görünüm değişince miktarın aynı kaldığını kavrayamama = sayı korunumu eksikliği."},
+{topic:"Sanat",q:"Bir öğretmenin okul öncesi sanat etkinliğinde aşağıdakilerden hangisini yapması UYGUN DEĞİLDİR?",options:["Farklı materyaller sunmak","Süreci ön plana almak","Çocuklara boyama şablonu dağıtmak","Açık uçlu sorular sormak","Ürünü değil çabayı takdir etmek"],correct:2,exp:"Şablon/boyama kalıbı yaratıcılığı engeller, kullanılmaz."},
+{topic:"Müzik",q:"Öğretmen çocuklara diz vurma, el çırpma ve ayak vurmayı ritim eşliğinde yaptırıp basit ksilofonlarla melodi kurdurmaktadır. Bu yaklaşım hangi kuramcıya aittir?",options:["Kodaly","Suzuki","Carl Orff","Dalcroze","Gordon"],correct:2,exp:"Beden perküsyonu + elementer çalgılar (ksilofon) = Orff."},
+{topic:"Drama",q:"Öğretmen bir hikâye kahramanını sandalyeye oturtur ve çocuklar ona 'Neden o kadar üzgündün?' gibi sorular sorar; kahraman yanıtlar. Bu teknik hangisidir?",options:["Donuk imge","Sıcak sandalye","Bilinç koridoru","Rol değiştirme","Öğretmen rolde"],correct:1,exp:"Bir karakterin sandalyede sorulara yanıt vermesi = sıcak sandalye."},
+{topic:"Kuramlar",q:"Sınıfta yıldız alan arkadaşını gören Deniz'in de kurallara uymaya başlaması, Bandura'nın hangi kavramıyla açıklanır?",options:["Doğrudan pekiştirme","Dolaylı (vekil) pekiştirme","Olumsuz pekiştirme","Sönme","Ceza"],correct:1,exp:"Başkasının aldığı pekiştireci gözleyip aynı davranışı yapma = dolaylı (vekil) pekiştirme."},
+{topic:"Okuryazarlık",q:"Öğretmen kitabı çocuğa ters uzatır; çocuk kitabı doğru çevirip 'buradan başlanır, soldan sağa gidilir' der. Bu davranış hangi beceriyi gösterir?",options:["Fonolojik farkındalık","Alfabe bilgisi","Yazı (print) farkındalığı","Sözcük dağarcığı","Dinleme"],correct:2,exp:"Kitap tutma yönü ve yazının akış yönünü bilme = yazı farkındalığı."},
+{topic:"Yaklaşımlar",q:"Bir okulda karma yaş grupları vardır, materyaller gerçek boyutludur, çocuk hatasını öğretmenden değil materyalin kendisinden fark eder. Bu yaklaşım hangisidir?",options:["Reggio Emilia","Waldorf","Montessori","High/Scope","Bank Street"],correct:2,exp:"Hata kontrolünün materyalde olması ve hazırlanmış çevre = Montessori."},
+{topic:"Sağlık",q:"Yeni doğan bebeğin ayak tabanı topuktan parmaklara doğru çizildiğinde ayak parmaklarının yelpaze gibi açılması hangi reflekstir?",options:["Moro","Babinski","Arama","Yakalama","Emme"],correct:1,exp:"Ayak tabanı uyarısıyla parmakların açılması = Babinski."},
+{topic:"Ruh Sağlığı",q:"Kardeşi doğduktan sonra tuvalet eğitimini tamamlamış çocuğun tekrar altını ıslatması ve bebek gibi konuşması hangi savunma mekanizmasıdır?",options:["Yansıtma","Gerileme (regresyon)","Bastırma","Yer değiştirme","Ödünleme"],correct:1,exp:"Önceki gelişim düzeyine dönme = gerileme (regresyon)."},
+{topic:"Edebiyat",q:"Okul öncesi resimli kitaplarda resim ve metin ilişkisi için aşağıdakilerden hangisi doğrudur?",options:["Metin resimden fazla olmalı","Resim ve metin eşit olmalı","Resim metinden çok daha fazla yer kaplamalı","Sadece metin olmalı","Resim dekoratif olmalı"],correct:2,exp:"Çocuk görsel okuma yaptığı için resim baskın olmalı."},
+{topic:"Anne-Baba",q:"Kurallar katıdır, 'ben ne dersem o olur' anlayışı hâkimdir, çocuğa açıklama yapılmaz ve sıcaklık düşüktür. Bu hangi ebeveyn tutumudur?",options:["Demokratik","Otoriter","İzin verici","İhmalkâr","Aşırı koruyucu"],correct:1,exp:"Katı kural + açıklama yok + düşük sevgi = otoriter."},
+{topic:"Çocuk Hakları",q:"Çocuk haklarına ilişkin ilk yazılı uluslararası belge aşağıdakilerden hangisidir?",options:["1989 BM Sözleşmesi","1959 BM Bildirgesi","1924 Cenevre Bildirgesi","İnsan Hakları Evrensel Beyannamesi","Lizbon Antlaşması"],correct:2,exp:"İlk yazılı belge 1924 Cenevre Çocuk Hakları Bildirgesi'dir."},
+{topic:"Gelişim",q:"Piaget'ye göre okul öncesi (2-7 yaş) çocuk hangi bilişsel dönemdedir?",options:["Duyusal-motor","İşlem öncesi","Somut işlemler","Soyut işlemler","Sezgisel sonrası"],correct:1,exp:"2-7 yaş = işlem öncesi dönem."},
+{topic:"Program",q:"MEB okul öncesi programının konuların genişleyerek tekrar etmesini ifade eden özelliği hangisidir?",options:["Eklektik","Sarmal","Esnek","Dengeli","Çocuk merkezli"],correct:1,exp:"Konuların genişleyerek yinelenmesi = sarmallık."},
+{topic:"Oyun",q:"Vygotsky'ye göre oyunun en önemli işlevi aşağıdakilerden hangisidir?",options:["Fiziksel enerjiyi boşaltma","Yakınsak gelişim alanı (ZPD) yaratıp öz-denetimi geliştirme","Yalnızca eğlence sağlama","Kas gelişimini hızlandırma","Rekabeti öğretme"],correct:1,exp:"Vygotsky oyunu ZPD yaratan ve öz-denetimi geliştiren temel etkinlik sayar."}
+];
+
+// ==================== AYARLAR (API KEY + MODEL) ====================
+const MODEL_PRESETS = {
+  gemini: ["gemini-2.5-flash","gemini-2.5-flash-lite","gemini-2.5-pro"],
+  openai: ["gpt-4o-mini","gpt-4o","gpt-4.1-mini","gpt-4.1","o4-mini"]
+};
+const DEFAULT_MODEL = { gemini:"gemini-2.5-flash", openai:"gpt-4o-mini" };
+let SETTINGS = { provider:"gemini", key:"", model:"gemini-2.5-flash" };
+
+function loadSettings(){
+  try{ const r=localStorage.getItem('oabt_settings'); if(r) SETTINGS=Object.assign(SETTINGS,JSON.parse(r)); }catch(e){}
+  // Kapatılmış modelleri otomatik güncelle (gemini-2.0-* 1 Haziran 2026'da kapatıldı)
+  if(SETTINGS.provider==='gemini' && /^gemini-(2\.0|1\.5)/.test(SETTINGS.model||'')){ SETTINGS.model='gemini-2.5-flash'; persistSettings(); }
+}
+function persistSettings(){ try{ localStorage.setItem('oabt_settings',JSON.stringify(SETTINGS)); }catch(e){} }
+function updateStatusDot(){ const d=document.getElementById('status-dot'); if(!d) return; if(RING.keys.length) d.classList.add('ok'); else d.classList.remove('ok'); }
+function populateModels(){ document.getElementById('model-list').innerHTML = MODEL_PRESETS[SETTINGS.provider].map(m=>`<option value="${m}">`).join(''); }
+function onProviderChange(){
+  const p=document.getElementById('set-provider').value; SETTINGS.provider=p; populateModels();
+  document.getElementById('set-model').placeholder=DEFAULT_MODEL[p];
+  const kh=document.getElementById('key-hint');
+  kh.innerHTML = (p==='gemini')
+    ? 'Gemini anahtarını ücretsiz al: <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a>'
+    : 'OpenAI anahtarını al: <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a>';
+}
+function openSettings(){
+  document.getElementById('set-provider').value=SETTINGS.provider; onProviderChange();
+  document.getElementById('set-key').value=RING.keys.join('\n'); document.getElementById('set-model').value=SETTINGS.model||'';
+  renderKeyStatus();
+  document.getElementById('set-rpm').value=RL.rpm;
+  document.getElementById('test-result').style.display='none';
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings(){ document.getElementById('settings-modal').classList.remove('open'); }
+function saveSettings(){
+  SETTINGS.provider=document.getElementById('set-provider').value;
+  ringSet(document.getElementById('set-key').value.split(/[\n,;]+/).map(x=>x.trim()));
+  SETTINGS.key=RING.keys[0]||''; RING.aktif=null; ringSave();
+  SETTINGS.model=document.getElementById('set-model').value.trim()||DEFAULT_MODEL[SETTINGS.provider];
+  setRPM(document.getElementById('set-rpm').value);
+  persistSettings(); updateStatusDot(); renderKeyStatus();
+  const tr=document.getElementById('test-result'); tr.style.display='block'; tr.style.background='#ecfdf5'; tr.style.color='#065f46';
+  tr.innerHTML='<i class="fas fa-check-circle mr-1"></i> Ayarlar kaydedildi. AI özellikleri açık.';
+  setTimeout(closeSettings,900);
+}
+function renderKeyStatus(){
+  const box=document.getElementById('key-status'); if(!box) return;
+  if(!RING.keys.length){ box.innerHTML=''; return; }
+  const n=Date.now();
+  box.innerHTML = RING.keys.map((k,i)=>{
+    const c=RING.cool[k]||0, dolu=c>n;
+    const dk=dolu?Math.ceil((c-n)/60000):0;
+    return `<div style="display:flex; align-items:center; gap:.4rem; font-size:.7rem; font-weight:800; padding:.25rem 0; color:${dolu?'#b91c1c':'#047857'}">
+      <span>${dolu?'🔴':'🟢'}</span><span>${i+1}. ${ringMask(k)}</span>
+      <span style="margin-left:auto">${dolu?('kota dolu · '+(dk>60?Math.ceil(dk/60)+' sa':dk+' dk')):'hazır'}</span>
+    </div>`;
+  }).join('');
+}
+async function testConnection(){
+  const tr=document.getElementById('test-result');
+  const prov=document.getElementById('set-provider').value;
+  const show=(bg,fg,html)=>{ tr.style.display='block'; tr.style.background=bg; tr.style.color=fg; tr.innerHTML=html; };
+  const keys=document.getElementById('set-key').value.split(/[\n,;]+/).map(x=>x.trim()).filter(x=>x.length>8);
+  if(!keys.length){ show('#fee2e2','#991b1b','Önce en az bir API anahtarı gir.'); return; }
+
+  if(prov==='openai'){
+    show('#eef2ff','#3730a3','<i class="fas fa-spinner fa-spin mr-1"></i> Test ediliyor...');
+    try{
+      await callOpenAI("Sadece 'OK' yaz.","",false,{provider:'openai',key:keys[0],fixedKey:true,model:document.getElementById('set-model').value.trim()||DEFAULT_MODEL.openai},1);
+      show('#ecfdf5','#065f46','<i class="fas fa-check-circle mr-1"></i> Bağlantı başarılı! Kaydet\'e bas.');
+    }catch(e){ show('#fee2e2','#991b1b','<b>Başarısız</b><br><span style="font-size:.72rem; font-weight:700">'+netHatasi(e)+'</span>'); }
+    return;
+  }
+
+  // ADIM 1 — Her anahtarı TEK TEK doğrula
+  const sonuc=[]; let ilkGecerli=null, modelListesi=null;
+  for(let i=0;i<keys.length;i++){
+    show('#eef2ff','#3730a3',`<i class="fas fa-spinner fa-spin mr-1"></i> ${i+1}/${keys.length} · anahtar doğrulanıyor...`);
+    try{
+      const list=await geminiListModels(keys[i]);
+      sonuc.push({k:keys[i], ok:true, not:list.length+' model'});
+      if(!ilkGecerli){ ilkGecerli=keys[i]; modelListesi=list; }
+    }catch(e){ sonuc.push({k:keys[i], ok:false, not:netHatasi(e).slice(0,70)}); }
+  }
+  const gecerli=sonuc.filter(x=>x.ok);
+  let rapor = sonuc.map((x,i)=>`<div style="font-size:.7rem; font-weight:800; color:${x.ok?'#047857':'#b91c1c'}; padding:.15rem 0">${x.ok?'✅':'❌'} ${i+1}. ${ringMask(x.k)} — ${x.not}</div>`).join('');
+
+  if(!gecerli.length){ show('#fee2e2','#991b1b','<b>Hiçbir anahtar kabul edilmedi</b>'+rapor); return; }
+
+  // ADIM 2 — Model seç ve gerçek istekle dene
+  document.getElementById('model-list').innerHTML = modelListesi.map(m=>`<option value="${m}">`).join('');
+  const inp=document.getElementById('set-model');
+  let model=inp.value.trim(); let oto=false;
+  if(!model || modelListesi.indexOf(model)===-1){ model=pickBestModel(modelListesi); inp.value=model; oto=true; }
+  show('#eef2ff','#3730a3','<i class="fas fa-spinner fa-spin mr-1"></i> <b>'+model+'</b> deneniyor...');
+  let calisti=false;
+  try{ await callGemini("Sadece 'OK' yaz.","",false,{provider:'gemini',key:ilkGecerli,fixedKey:true,model},1); calisti=true; }
+  catch(e){
+    const adaylar=modelListesi.filter(m=>/flash|pro/i.test(m) && !/embedding|imagen|veo|tts|live|aqa/i.test(m)).slice(0,6);
+    for(const m of adaylar){
+      try{ await callGemini("Sadece 'OK' yaz.","",false,{provider:'gemini',key:ilkGecerli,fixedKey:true,model:m},1); inp.value=m; model=m; oto=true; calisti=true; break; }catch(_){}
+    }
+    if(!calisti){ show('#fee2e2','#991b1b','<b>Anahtar geçerli ama model yanıt vermedi</b><br><span style="font-size:.72rem; font-weight:700">'+netHatasi(e)+'</span>'+rapor); return; }
+  }
+
+  // ADIM 3 — Anahtarlar AYNI PROJEDE mi? (2+ geçerli anahtar varsa)
+  let projeNotu='';
+  if(gecerli.length>1){
+    show('#eef2ff','#3730a3','<i class="fas fa-spinner fa-spin mr-1"></i> Anahtarlar ayrı projelerde mi diye bakılıyor...');
+    projeNotu = `<div style="background:#eef2ff; border:1.5px solid #c7d2fe; border-radius:.6rem; padding:.5rem; margin-top:.5rem; font-size:.68rem; font-weight:800; color:#3730a3">
+      ℹ️ <b>${gecerli.length} geçerli anahtar.</b> Google'da kota <b>proje başına</b>dır. Bu anahtarlar ayrı projelerde oluşturulduysa kotaları da ayrıdır ve biri dolunca diğerine otomatik geçilir.
+      Aynı projedelerse hepsi aynı anda dolar — o zaman uygulama sana bunu söyleyecek.</div>`;
+  }
+  show('#ecfdf5','#065f46','<i class="fas fa-check-circle mr-1"></i> <b>Çalışıyor!</b> Model: <b>'+model+'</b>'+(oto?' (otomatik seçildi)':'')+
+       '<div style="margin-top:.4rem">'+rapor+'</div>'+projeNotu+
+       '<div style="font-size:.72rem; font-weight:800; margin-top:.4rem">Şimdi <b>Kaydet</b>\'e bas.</div>');
+}
+
+// ==================== AI MOTORU (Gemini + OpenAI) ====================
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+
+
+
+// ==================== ANAHTAR HALKASI (çoklu anahtar + otomatik geçiş) ====================
+// NOT: Google'da kota PROJE başınadır, anahtar başına değil. Aynı projedeki anahtarlar
+// aynı havuzu paylaşır; ayrı projelerdeki anahtarların ayrı kotası olur.
+// Bu yüzden aşağıda "aynı proje" tespiti de yapıyoruz.
+const RING = { keys: [], cool: {}, aktif: null, ayniProjeUyarisi: false };
+function ringSet(list){ RING.keys = list.filter(k=>k && k.length>8); }
+function ringLoad(){
+  try{
+    const r=localStorage.getItem('oabt_keys');
+    if(r) ringSet(JSON.parse(r));
+    else if(SETTINGS.key) ringSet([SETTINGS.key]);   // eski tek anahtarı taşı
+  }catch(e){ if(SETTINGS.key) ringSet([SETTINGS.key]); }
+  try{ const c=localStorage.getItem('oabt_keycool'); if(c) RING.cool=JSON.parse(c); }catch(e){}
+}
+function ringSave(){
+  try{ localStorage.setItem('oabt_keys', JSON.stringify(RING.keys)); localStorage.setItem('oabt_keycool', JSON.stringify(RING.cool)); }catch(e){}
+}
+function ringHazir(){ const n=Date.now(); return RING.keys.filter(k=>!(RING.cool[k]>n)); }
+function ringPick(){
+  const hazir = ringHazir();
+  if(!hazir.length) return null;
+  if(RING.aktif && hazir.indexOf(RING.aktif)!==-1) return RING.aktif;
+  RING.aktif = hazir[0];
+  return RING.aktif;
+}
+function ringNo(k){ return RING.keys.indexOf(k)+1; }
+function ringMask(k){ return k.slice(0,6)+'…'+k.slice(-4); }
+// Anahtarı dinlendirmeye al. Günlük kota dolduysa Pasifik gece yarısına kadar.
+function ringCool(key, mesaj){
+  const gunluk = /per day|PerDay|daily|GenerateRequestsPerDay/i.test(String(mesaj||''));
+  let ms = 70000;                       // dakikalık kota → ~70 sn
+  if(gunluk){
+    // Pasifik saatiyle gece yarısına kadar (RPD o zaman sıfırlanır)
+    const now = new Date();
+    const ptNow = new Date(now.toLocaleString('en-US',{timeZone:'America/Los_Angeles'}));
+    const ptMid = new Date(ptNow); ptMid.setHours(24,0,0,0);
+    ms = Math.max(60000, ptMid - ptNow);
+  }
+  RING.cool[key] = Date.now() + ms; ringSave();
+  return gunluk;
+}
+function keyToast(html, renk){
+  const t=document.getElementById('key-toast'); if(!t) return;
+  t.style.display='block'; t.innerHTML=html;
+  if(renk==='red'){ t.style.background='#fee2e2'; t.style.borderColor='#fca5a5'; t.style.color='#991b1b'; }
+  else { t.style.background='#fffbeb'; t.style.borderColor='#fcd34d'; t.style.color='#92400e'; }
+  clearTimeout(keyToast._t); keyToast._t=setTimeout(()=>{ t.style.display='none'; }, 9000);
+}
+function ringBekleme(){
+  const n=Date.now(); let en=Infinity;
+  RING.keys.forEach(k=>{ const c=RING.cool[k]||0; if(c>n) en=Math.min(en,c-n); });
+  if(en===Infinity) return '';
+  const dk=Math.ceil(en/60000);
+  return dk>60 ? Math.ceil(dk/60)+' saat' : dk+' dakika';
+}
+
+// ==================== MODEL UYUMU (otomatik) ====================
+// Model aileleri farklı parametre bekliyor:
+//  · Gemini 2.5 Flash  -> thinkingConfig.thinkingBudget = 0  (düşünmeyi kapatır)
+//  · Gemini 3.x / *-latest -> thinkingLevel kullanır; eski thinkingBudget ile birlikte 400 verir.
+//    Ayrıca 3.5'te temperature göndermek önerilmiyor.
+// Takma adlar (gemini-flash-latest) hangi modele işaret ettiğini söylemediği için
+// TAHMİN ETMİYORUZ: sırayla deniyoruz, çalışan varyantı hatırlıyoruz.
+const CFG_OK = {};   // model -> çalıştığı bilinen varyant indeksi
+function genCfgVariants(model, wantJSON){
+  const base = wantJSON ? { responseMimeType:"application/json" } : {};
+  const v = [];
+  const yeniSeri = /gemini-[3-9]|-latest/i.test(model);
+  if(yeniSeri){
+    v.push(Object.assign({}, base, { thinkingConfig:{ thinkingLevel:"low" } }));  // 3.x doğru yol
+    v.push(Object.assign({}, base));                                              // düşünme ayarı yok
+    v.push(Object.assign({}, base, { thinkingConfig:{ thinkingBudget:0 } }));     // eski yol (geriye dönük)
+  } else if(/flash/i.test(model)){
+    v.push(Object.assign({}, base, { temperature:1.0, thinkingConfig:{ thinkingBudget:0 } }));
+    v.push(Object.assign({}, base, { temperature:1.0 }));
+  } else {
+    v.push(Object.assign({}, base, { temperature:1.0 }));
+  }
+  v.push(Object.assign({}, base));  // en sade: her modelde çalışır
+  return v;
+}
+
+// ==================== TANI ARAÇLARI ====================
+// Sunucunun gönderdiği gerçek hata mesajını okur (yoksa boş döner)
+async function googleErr(r){
+  try{ const j=await r.json(); return (j.error&&(j.error.message||j.error.status))||JSON.stringify(j).slice(0,200); }
+  catch(e){ try{ return (await r.text()).slice(0,200); }catch(_){ return 'ayrıntı yok'; } }
+}
+// Anahtarın GEÇERLİ olup olmadığını, modelden bağımsız olarak kanıtlar
+// ve o anahtarla kullanılabilen modellerin listesini getirir.
+async function geminiListModels(key){
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?key='+encodeURIComponent(key));
+  if(!r.ok) throw new Error('HTTP '+r.status+' · '+(await googleErr(r)));
+  const d=await r.json();
+  return (d.models||[])
+    .filter(m=>(m.supportedGenerationMethods||[]).indexOf('generateContent')!==-1)
+    .map(m=>String(m.name).replace('models/',''));
+}
+// Listeden en uygun modeli seçer (ders anlatımı için Flash ideal)
+function pickBestModel(list){
+  const tercih=[/^gemini-2\.5-flash$/, /^gemini-2\.5-flash-lite$/, /2\.5-flash/, /flash-lite/, /flash/, /2\.5-pro/, /./];
+  for(const t of tercih){ const m=list.find(x=>t.test(x) && !/embedding|aqa|imagen|veo|tts|live/i.test(x)); if(m) return m; }
+  return list[0];
+}
+function netHatasi(e){
+  const m=String(e&&e.message||e);
+  if(/Failed to fetch|NetworkError|Load failed/i.test(m))
+    return 'İnternete ulaşılamadı. Muhtemel sebep: bağlantı yok, VPN/güvenlik duvarı ya da bir tarayıcı eklentisi (reklam engelleyici) isteği kesiyor. Eklentileri kapatıp ya da gizli sekmede dene.';
+  if(/API_KEY_INVALID|API key not valid|400.*API key/i.test(m))
+    return 'Anahtar geçersiz. aistudio.google.com/apikey adresinden YENİ bir anahtar oluştur ve başında/sonunda boşluk kalmadan yapıştır.';
+  if(/SERVICE_DISABLED|has not been used|is disabled/i.test(m))
+    return 'Bu anahtarın bağlı olduğu projede Generative Language API kapalı. AI Studio\'da yeni bir anahtar oluşturmak en kolay çözüm.';
+  if(/PERMISSION_DENIED|referer|referrer|API_KEY_HTTP_REFERRER/i.test(m))
+    return 'Anahtara web sitesi (HTTP referrer) kısıtlaması konmuş. Dosya bilgisayarından açıldığı için engelleniyor. AI Studio\'da kısıtlamasız yeni bir anahtar oluştur.';
+  if(/NOT_FOUND|is not found|not supported/i.test(m))
+    return 'Model adı bu anahtarla kullanılamıyor. "Test Et" çalışan modeli otomatik bulup yazacak.';
+  if(/TÜM_ANAHTARLAR_DOLU/i.test(m))
+    return 'Tüm anahtarlarının kotası dolu'+(m.split('·')[1]?' —'+m.split('·')[1]:'')+'. Anahtarların AYNI PROJEDEyse hepsi aynı kotayı paylaşır; ayrı projelerde anahtar oluşturursan her birinin kendi kotası olur. Ya da ⚙️ ile modeli gemini-2.5-flash-lite yap.';
+  if(/Boş yanıt|MAX_TOKENS/i.test(m))
+    return 'Model yanıtı boş/kesik döndü. ⚙️ ayarlarından modeli gemini-2.5-flash veya gemini-2.5-flash-lite yap (flash olmayan modellerde bu olabiliyor) ve tekrar dene.';
+  if(/Güvenlik filtresi/i.test(m))
+    return 'Google güvenlik filtresi bu içeriği engelledi. Soruyu atlayıp devam et ya da tekrar dene.';
+  if(/JSON okunamadı/i.test(m))
+    return 'Model bozuk biçimde yanıt verdi. Tekrar dene; sürekli olursa ⚙️ ayarlarından modeli gemini-2.5-flash yap.';
+  if(/429|RESOURCE_EXHAUSTED|quota/i.test(m))
+    return 'Kota doldu. Hız sınırını düşür (örn. 5) veya modeli gemini-2.5-flash-lite yap. Günlük kota dolduysa Pasifik saatiyle gece yarısı sıfırlanır.';
+  return m;
+}
+
+// ==================== İSTEK KUYRUĞU (ücretsiz kota koruması) ====================
+// Ücretsiz katmanda dakika başına istek sınırı düşüktür (Flash ~10-15 RPM).
+// Aynı anda salkım hâlinde istek atmak 429 (kota doldu) hatası verir.
+// Bu kuyruk istekleri sıraya dizer ve dakikada RPM_LIMIT'i asla aşmaz.
+const RL = { rpm: 8, times: [], busy: 0, maxConcurrent: 2 };
+async function rateGate(){
+  while(true){
+    const now = Date.now();
+    RL.times = RL.times.filter(t => now - t < 60000);
+    if(RL.times.length < RL.rpm && RL.busy < RL.maxConcurrent){ RL.times.push(now); RL.busy++; return; }
+    await sleep(700);
+  }
+}
+function rateRelease(){ RL.busy = Math.max(0, RL.busy-1); }
+function setRPM(v){ RL.rpm = Math.max(1, parseInt(v)||8); try{ localStorage.setItem('oabt_rpm', RL.rpm); }catch(e){} }
+function loadRPM(){ try{ const v=localStorage.getItem('oabt_rpm'); if(v) RL.rpm=parseInt(v)||8; }catch(e){} }
+async function callGemini(prompt, system, wantJSON, s, retries=4){
+  const model=s.model||DEFAULT_MODEL.gemini;
+  const sabitAnahtar = !!s.fixedKey;   // Test Et tek anahtarı dener; normal kullanım halkayı kullanır
+  const payload={ contents: Array.isArray(prompt)? prompt : [{role:"user",parts:[{text:prompt+"\n[ref:"+Date.now()+Math.random()+"]"}]}] };
+  if(system) payload.systemInstruction={parts:[{text:system}]};
+  // generationConfig varyantları aşağıda, istek anında denenir (bkz. genCfgVariants)
+  const variants = genCfgVariants(model, wantJSON);
+  let vi = (CFG_OK[model]!==undefined) ? CFG_OK[model] : 0;   // çalıştığı bilinen varyanttan başla
+  const delays=[1500,4000,9000,20000]; let last;
+  for(let i=0;i<retries;i++){
+    payload.generationConfig = variants[vi];
+    // --- Kullanılacak anahtarı seç ---
+    let key = sabitAnahtar ? s.key : ringPick();
+    if(!key){
+      const b=ringBekleme();
+      throw new Error('TÜM_ANAHTARLAR_DOLU'+(b?' · en erken '+b+' sonra':''));
+    }
+    const url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
+    await rateGate();
+    try{
+      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      if(r.status===429){
+        const em = await googleErr(r);
+        if(sabitAnahtar) throw new Error('429 · '+em);
+        // --- ANAHTAR DEĞİŞTİR ---
+        const eskiNo = ringNo(key);
+        const gunluk = ringCool(key, em);
+        const kalan = ringHazir();
+        RING.aktif = kalan[0] || null;
+        if(RING.aktif){
+          // Yedek anahtar da anında dolduysa büyük ihtimalle AYNI PROJEDEler
+          keyToast(`🔑 <b>${eskiNo}. anahtarın ${gunluk?'GÜNLÜK':'dakikalık'} kotası doldu</b> → <b>${ringNo(RING.aktif)}. anahtara</b> geçildi.<br><span style="font-size:.7rem; font-weight:700">Hazır anahtar: ${kalan.length}/${RING.keys.length}${gunluk?' · Günlük kota Pasifik gece yarısı sıfırlanır.':''}</span>`);
+          i--; continue;   // yeni anahtarla hemen tekrar dene, deneme hakkı yakmadan
+        }
+        const b=ringBekleme();
+        keyToast(`🚫 <b>Tüm anahtarların kotası dolu</b> (${RING.keys.length} anahtar).${b?' En erken <b>'+b+'</b> sonra tekrar dene.':''}<br><span style="font-size:.7rem; font-weight:700">Hepsi aynı anda dolduysa anahtarlar muhtemelen AYNI PROJEDE — kota paylaşılıyor demektir.</span>`,'red');
+        throw new Error('TÜM_ANAHTARLAR_DOLU'+(b?' · en erken '+b+' sonra':''));
+      }
+      if(!r.ok){
+        const em = await googleErr(r);
+        // 400 = parametre uyumsuzluğu olabilir → bir sonraki varyantla ANINDA tekrar dene
+        if(r.status===400 && vi < variants.length-1){ vi++; i--; continue; }
+        throw new Error('HTTP '+r.status+' · '+em);
+      }
+      const d=await r.json();
+      const cand=d.candidates&&d.candidates[0];
+      const t=((cand&&cand.content&&cand.content.parts)||[]).map(x=>x.text||'').join('').trim();
+      if(!t){
+        const bl=d.promptFeedback&&d.promptFeedback.blockReason;
+        const fr=cand&&cand.finishReason;
+        if(bl) throw new Error('Güvenlik filtresi engelledi ('+bl+')');
+        if(fr==='MAX_TOKENS') throw new Error('MAX_TOKENS: yanıt çok uzun, kesildi');
+        throw new Error('Boş yanıt'+(fr?' ('+fr+')':''));
+      }
+      CFG_OK[model]=vi;   // bu varyant çalıştı, bir dahakine bununla başla
+      return t;
+    }catch(e){
+      last=e;
+      const m=String(e.message||'');
+      // Yanıt boş/kesik geldiyse düşünme ayarı yüzünden olabilir → varyant değiştir
+      if(/Boş yanıt|MAX_TOKENS/i.test(m) && vi < variants.length-1){ vi++; continue; }   // finally zaten rateRelease() çağırır
+      if(m.indexOf('429')!==-1){ if(i<retries-1) await sleep(25000); }
+      else if(i<retries-1) await sleep(delays[i]);
+    }finally{ rateRelease(); }
+  }
+  if(String(last&&last.message).indexOf('429')!==-1) throw new Error('Kota doldu (429) — biraz bekleyip tekrar dene ya da ⚙️ ayarlarından modeli gemini-2.5-flash-lite yap');
+  throw last;
+}
+async function callOpenAI(prompt, system, wantJSON, s, retries=4){
+  const model=s.model||DEFAULT_MODEL.openai;
+  const messages=[]; if(system) messages.push({role:'system',content:system});
+  if(Array.isArray(prompt)) messages.push(...prompt); else messages.push({role:'user',content:prompt});
+  const body={model,messages,temperature:1.0};
+  if(wantJSON) body.response_format={type:"json_object"};
+  const delays=[1500,4000,9000,20000]; let last;
+  for(let i=0;i<retries;i++){
+    await rateGate();
+    try{
+      const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.key},body:JSON.stringify(body)});
+      if(!r.ok){ throw new Error('HTTP '+r.status+' · '+(await googleErr(r))); }
+      const d=await r.json();
+      const t=d.choices?.[0]?.message?.content;
+      if(!t) throw new Error("Boş yanıt");
+      return t;
+    }catch(e){ last=e; if(i<retries-1) await sleep(delays[i]); }finally{ rateRelease(); }
+  }
+  throw last;
+}
+function hasKey(){ return RING.keys.length>0; }
+function requireKey(){
+  if(!hasKey()){ openSettings();
+    const tr=document.getElementById('test-result'); tr.style.display='block'; tr.style.background='#fef3c7'; tr.style.color='#92400e';
+    tr.innerHTML='<i class="fas fa-key mr-1"></i> AI özellikleri için önce API anahtarını gir ve kaydet.';
+    return false; }
+  return true;
+}
+function clean(t){ return String(t).replace(/```html/gi,'').replace(/```/gi,''); }
+async function callText(prompt, system=""){
+  return clean(SETTINGS.provider==='openai' ? await callOpenAI(prompt,system,false,SETTINGS) : await callGemini(prompt,system,false,SETTINGS));
+}
+// Çok turlu sohbet (canlı özel ders)
+async function callChat(history, system){
+  if(SETTINGS.provider==='openai'){
+    return clean(await callOpenAI(history.map(m=>({role:m.role==='ai'?'assistant':'user',content:m.text})), system, false, SETTINGS));
+  }
+  const contents = history.map(m=>({ role: m.role==='ai'?'model':'user', parts:[{text:m.text}] }));
+  return clean(await callGemini(contents, system, false, SETTINGS));
+}
+
+const QUIZ_SYSTEM = "Sen ÖSYM'nin KPSS ÖABT Okul Öncesi Öğretmenliği soru yazarısın. Sorular GERÇEKTEN ZOR olacak: ezber/tanım sorusu YAZMA. Her soru bir SINIF İÇİ VAKA ya da çocuk davranışı üzerinden kurulacak ve adaydan ANALİZ, KAVRAM AYIRT ETME veya EN UYGUN ÖĞRETMEN DAVRANIŞINI SEÇME istenecek. Çeldiriciler çok güçlü olacak: her şık makul görünecek, ikisi birbirine çok yakın olacak (örneğin tahmin/çıkarım, paralel/birlikte oyun, olumsuz pekiştireç/ceza, drama/tiyatro, şema öncesi/şematik gibi klasik karıştırılan ikililer). Kesin doğru TEK bir cevap olacak. 'Aşağıdakilerden hangisi' kalıbını ÖSYM üslubuyla kullan. Çözüm (exp) kısa olacak ama neden doğru olduğunu VE en cazip çeldiricinin neden yanlış olduğunu söyleyecek. Yanıtın SADECE geçerli JSON olsun; açıklama, önsöz veya ``` işareti EKLEME.";
+const JSON_FORMAT = " Çıktını SADECE şu JSON biçiminde ver: {\"questions\":[{\"topic\":\"Ders adı\",\"q\":\"Soru\",\"options\":[\"A\",\"B\",\"C\",\"D\",\"E\"],\"correct\":0,\"exp\":\"Kısa çözüm\"}]}. 'correct' 0 tabanlı doğru şık indeksidir (A=0..E=4). Her soru 5 şıklı olmalı. 'topic' alanı şu değerlerden biri olmalı: Gelişim, Oyun, Program, Kuramlar, Okuryazarlık, Ruh Sağlığı, Fen, Matematik, Sağlık, Anne-Baba, Sanat, Müzik, Drama, Edebiyat, Çocuk Hakları.";
+function normalizeQ(o){
+  if(!o) return null;
+  const opts=o.options||o.secenekler||o.siklar||[];
+  let c=(typeof o.correct==='number')?o.correct:(typeof o.dogru==='number'?o.dogru:0);
+  if(typeof o.correct==='string'){ const m={A:0,B:1,C:2,D:3,E:4}; c=m[o.correct.trim().toUpperCase()]??0; }
+  if(!Array.isArray(opts)||opts.length<2||!(o.q||o.soru)) return null;
+  if(c<0||c>=opts.length) c=0;
+  return { topic:o.topic||o.konu||"Genel", q:o.q||o.soru, options:opts, correct:c, exp:o.exp||o.cozum||"" };
+}
+function parseQuestions(raw){
+  let t=String(raw).replace(/```json/gi,'').replace(/```/gi,'').trim(); let d=null;
+  try{ d=JSON.parse(t); }catch(e){
+    const a=t.indexOf('['), b=t.lastIndexOf(']');
+    if(a!==-1&&b!==-1){ try{ d=JSON.parse(t.substring(a,b+1)); }catch(_){} }
+    if(!d){ const x=t.indexOf('{'), y=t.lastIndexOf('}'); if(x!==-1&&y!==-1){ try{ d=JSON.parse(t.substring(x,y+1)); }catch(_){} } }
+  }
+  let arr=Array.isArray(d)?d:(d&&(d.questions||d.sorular||d.items))||null;
+  if(!Array.isArray(arr)) throw new Error("JSON okunamadı");
+  return arr.map(normalizeQ).filter(Boolean);
+}
+async function generateQuestions(prompt){
+  const full=prompt+JSON_FORMAT;
+  const raw = SETTINGS.provider==='openai' ? await callOpenAI(full,QUIZ_SYSTEM,true,SETTINGS) : await callGemini(full,QUIZ_SYSTEM,true,SETTINGS);
+  return parseQuestions(raw);
+}
+
+// ==================== DURUM ====================
+let currentQuizData=[], qIndex=0, userAnswers=[], lastQuizMode={type:'exam'}, timerInterval=null, timerSeconds=0;
+let chatHistory=[], chatContext=null;
+let MISTAKES=[], DIAGNOSIS={};
+function loadMistakes(){
+  try{ const r=localStorage.getItem('oabt_mistakes'); MISTAKES=r?JSON.parse(r):[]; }catch(e){ MISTAKES=[]; }
+  let changed=false;
+  MISTAKES.forEach(m=>{ if(!m.konuId){ const k=guessKonu(m); m.ders=k.ders; m.konu=k.konu; m.konuId=k.konuId; changed=true; } });
+  if(changed) saveMistakes();
+  try{ const d=localStorage.getItem('oabt_diag'); DIAGNOSIS=d?JSON.parse(d):{}; }catch(e){ DIAGNOSIS={}; }
+}
+function saveDiagnosis(){ try{ localStorage.setItem('oabt_diag',JSON.stringify(DIAGNOSIS)); }catch(e){} }
+function saveMistakes(){ try{ localStorage.setItem('oabt_mistakes',JSON.stringify(MISTAKES.slice(-300))); }catch(e){} }
+
+function switchView(v){
+  if(v!=='quiz') stopTimer();
+  document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+  const t=document.getElementById('view-'+v); if(t) t.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const n=document.getElementById('nav-'+v); if(n) n.classList.add('active');
+  if(v==='hata') renderMistakes();
+  window.scrollTo(0,0);
+}
+function showError(m){ try{ m=netHatasi(new Error(String(m))); }catch(e){} const e=document.getElementById('error-box'); e.innerHTML='<i class="fas fa-exclamation-circle mr-2"></i> '+m; e.style.display='block'; setTimeout(()=>e.style.display='none',7000); }
+
+// ==================== KONULAR (kategori gruplu) ====================
+function initTopics(){
+  let html='';
+  CATS.forEach(cat=>{
+    const list=TOPICS.filter(t=>t.cat===cat.key);
+    html += `<div class="cat-header" style="background:${cat.grad}">
+      <span class="cat-emoji">${cat.emoji}</span>
+      <span class="cat-name">${cat.name}</span>
+      <span class="cat-count">${cat.soru} soru · %${cat.yuzde}</span>
+    </div>`;
+    list.forEach(t=>{
+      const i=TOPICS.indexOf(t);
+      html += `<div class="topic-card" id="tc-${i}">
+        <div class="topic-head" onclick="toggleTopic(${i})">
+          <div class="t-icon">${t.icon}</div>
+          <div class="t-title">${t.title}</div>
+          <i class="fas fa-chevron-down t-chevron"></i>
+        </div>
+        <div class="topic-body">
+          <div class="content-html">${t.exp}</div>
+          <button class="action-btn btn-quiz" onclick="startTopicQuiz('${t.title.replace(/'/g,"\\'")}','${cat.name}')">
+            <i class="fas fa-robot mr-2"></i> AI ile 15 Soruluk Konu Testi Üret
+          </button>
+          <button class="action-btn" style="background:linear-gradient(135deg,#ef4444,#b91c1c); color:#fff; margin-top:.8rem; box-shadow:0 4px 15px rgba(239,68,68,.3);" onclick="generateTrapTest('${t.title.replace(/'/g,"\\'")}','${cat.name}')">
+            🚨 ÖSYM Tuzak Simülatörü (5 Soru)
+          </button>
+          <button class="action-btn" style="background:#ecfdf5; color:#047857; border:2px solid #6ee7b7; margin-top:.8rem;" onclick="openTopicChat('${t.title.replace(/'/g,"\\'")}')">
+            💬 Bu Konuyu Hoca ile Konuş
+          </button>
+        </div>
+      </div>`;
+    });
+  });
+  document.getElementById('topics-container').innerHTML=html;
+}
+function toggleTopic(i){
+  const c=document.getElementById('tc-'+i), open=c.classList.contains('open');
+  document.querySelectorAll('.topic-card').forEach(x=>x.classList.remove('open'));
+  if(!open){ c.classList.add('open'); setTimeout(()=>c.scrollIntoView({behavior:'smooth',block:'start'}),150); }
+}
+
+// ==================== TIMER ====================
+function startTimer(sec){
+  stopTimer(); timerSeconds=sec;
+  const c=document.getElementById('timer-chip'); c.style.display='flex'; c.classList.remove('warn'); renderTimer();
+  timerInterval=setInterval(()=>{
+    timerSeconds--; renderTimer();
+    if(timerSeconds<=300) c.classList.add('warn');
+    if(timerSeconds<=0){ stopTimer(); alert('Süre doldu! Sınav sonlandırılıyor.'); finishQuiz(true); }
+  },1000);
+}
+function stopTimer(){ if(timerInterval){ clearInterval(timerInterval); timerInterval=null; } const c=document.getElementById('timer-chip'); if(c) c.style.display='none'; }
+function renderTimer(){ const m=Math.floor(timerSeconds/60), s=timerSeconds%60; document.getElementById('timer-text').innerText=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
+
+// ==================== STATİK / AI TESTLER ====================
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function startStaticQuiz(ref,name,timed){
+  currentQuizData = shuffle(ref.map(x=>Object.assign({},x)));
+  document.getElementById('q-topic-name').innerText=name;
+  lastQuizMode={type:'static', ref:(ref===EXAM_50?'exam80':'predict'), name, timed};
+  initQuizUI();
+  if(timed) startTimer(75*60); else stopTimer();
+}
+async function generateAIExam(){
+  if(!requireKey()) return;
+  document.getElementById('q-topic-name').innerText="AI 50'LİK DENEME";
+  document.querySelector('#view-deneme > .big-card').style.display='none';
+  const loader=document.getElementById('ai-loading'); loader.style.display='flex';
+  const st=document.getElementById('ai-status-text'), pb=document.getElementById('ai-progress-bar');
+  st.innerText="ÖABT dağılımına göre soru üretimi başladı..."; pb.style.width="8%";
+  const B=(n,d,k)=>`KPSS ÖABT Okul Öncesi için "${d}" konusundan TAM ${n} soru üret. Kapsam: ${k}. Tüm soruların topic alanı tam olarak "${d}" olsun. Sorular ÖSYM zorluğunda, VAKA temelli, çeldiricisi güçlü olsun.`;
+  const batches=[
+    B(4,"Gelişim","Piaget bilişsel gelişim: işlem öncesi dönem özellikleri (benmerkezcilik, animizm, korunum yokluğu, merkezleme), özümleme-uyum sağlama-dengeleme"),
+    B(4,"Gelişim","Erikson (özerklik, girişimcilik), Kohlberg (gelenek öncesi düzey), Vygotsky (yakınsak gelişim alanı, yapı iskelesi), Freud (fallik dönem), bağlanma"),
+    B(4,"Oyun","Parten sosyal oyun sınıflaması (özellikle paralel/birlikte/iş birlikli ayrımı), Piaget oyun türleri, öğretmenin oyundaki rolü"),
+    B(4,"Program","MEB Okul Öncesi Eğitim Programının özellikleri, kazanım-gösterge, bütünleştirilmiş etkinlik, günlük eğitim akışı, Montessori/Reggio/HighScope/Waldorf ayrımı"),
+    B(4,"Kuramlar","Skinner (olumlu/olumsuz pekiştireç, I. ve II. tip ceza), Pavlov klasik koşullanma, Bandura model alma ve dolaylı pekiştirme, Premack, sönme"),
+    B(4,"Okuryazarlık","Sesbilgisel (fonolojik) farkındalık, yazı farkındalığı, okuma-yazmaya hazırlık, okula uyum ve ayrılık kaygısı"),
+    B(4,"Ruh Sağlığı","Öfke nöbeti, parmak emme, enürezis, kardeş kıskançlığı, gerileme, saldırganlık; öğretmenin doğru tepkisi ve etiketlememe"),
+    B(3,"Fen","Bilimsel süreç becerileri (özellikle tahmin ve çıkarım ayrımı), deney, fen köşesi, öğretmenin açık uçlu soru sorması"),
+    B(3,"Matematik","Sayı kavramının gelişimi (birebir eşleme, kardinal sayı), örüntü, sıralama, standart olmayan ölçme"),
+    B(3,"Sağlık","İlkyardım: yanık, boğulma/Heimlich, burun kanaması, havale, zehirlenme; beslenme ve bulaşıcı hastalık"),
+    B(3,"Anne-Baba","Baumrind anne-baba tutumları ve çocuktaki sonuçları, aile katılımı türleri, öğretmen-veli iletişimi"),
+    B(2,"Sanat","Lowenfeld çizim dönemleri (şema öncesi/şematik ayrımı, baş-ayaklı insan, taban çizgisi, röntgen resim), öğretmenin sanat etkinliğindeki rolü"),
+    B(2,"Müzik","Orff, Kodály, Dalcroze, Suzuki yaklaşımlarının ayrımı ve müzik etkinlikleri"),
+    B(2,"Drama","Dramanın aşamaları, doğaçlama, donuk imge, drama-tiyatro farkı"),
+    B(2,"Edebiyat","Çocuk kitabı seçim ölçütleri, didaktik olmama, etkileşimli (diyalojik) okuma"),
+    B(2,"Çocuk Hakları","BM Çocuk Hakları Sözleşmesi temel ilkeleri, oyun hakkı, ihmal-istismar ve öğretmenin bildirim yükümlülüğü")
+  ];
+  try{
+    let done=0;
+    const jobs=batches.map(bp=>generateQuestions(bp).then(r=>{ done++; pb.style.width=(8+done/batches.length*78)+"%"; st.innerText=`${done}/${batches.length} bölüm tamamlandı...`; return r; }).catch(e=>{ done++; return []; }));
+    const res=await Promise.all(jobs);
+    let all=res.flat();
+    if(!all.length) throw new Error("Hiç soru üretilemedi");
+    pb.style.width="92%"; st.innerText="Kitapçık birleştiriliyor...";
+    const LIMIT={"Gelişim":8,"Oyun":4,"Program":4,"Kuramlar":4,"Okuryazarlık":4,"Ruh Sağlığı":4,"Fen":3,"Matematik":3,"Sağlık":3,"Anne-Baba":3,"Sanat":2,"Müzik":2,"Drama":2,"Edebiyat":2,"Çocuk Hakları":2};
+    const used={}, final=[];
+    all.forEach(q=>{ const t=(q.topic||'').trim(); if(LIMIT[t]===undefined) return; used[t]=used[t]||0; if(used[t]<LIMIT[t]){ used[t]++; final.push(q); } });
+    currentQuizData=shuffle(final.length>=20?final:all.slice(0,50)); pb.style.width="100%";
+    setTimeout(()=>{ loader.style.display='none'; document.querySelector('#view-deneme > .big-card').style.display='block';
+      lastQuizMode={type:'exam'}; initQuizUI(); startTimer(75*60); },500);
+  }catch(e){
+    showError("Soru üretilemedi. "+netHatasi(e));
+    loader.style.display='none'; document.querySelector('#view-deneme > .big-card').style.display='block';
+  }
+}
+async function startTopicQuiz(title, ders){
+  if(!requireKey()) return;
+  document.getElementById('q-topic-name').innerText="AI KONU TESTİ";
+  switchView('deneme'); document.querySelector('#view-deneme > .big-card').style.display='none';
+  document.getElementById('ai-loading').style.display='flex';
+  document.getElementById('ai-status-text').innerText=`'${title}' konusunda 15 özgün soru yazılıyor...`;
+  document.getElementById('ai-progress-bar').style.width="50%";
+  try{
+    currentQuizData=await generateQuestions(`KPSS ÖABT Okul Öncesi kapsamında "${title}" konusundan ÖSYM zorluğunda, vaka temelli, çeldiricisi güçlü TAM 15 yeni soru üret. Tüm soruların topic alanı "${ders}" olsun.`);
+    if(!currentQuizData.length) throw new Error("Veri gelmedi");
+    document.getElementById('ai-progress-bar').style.width="100%";
+    setTimeout(()=>{ document.getElementById('ai-loading').style.display='none'; document.querySelector('#view-deneme > .big-card').style.display='block';
+      lastQuizMode={type:'topic',topic:title,ders}; initQuizUI(); },400);
+  }catch(e){
+    showError("Olmadı. "+netHatasi(e));
+    document.getElementById('ai-loading').style.display='none'; document.querySelector('#view-deneme > .big-card').style.display='block';
+  }
+}
+async function generateTrapTest(title, ders){
+  if(!requireKey()) return;
+  document.getElementById('q-topic-name').innerText="🚨 TUZAK SİMÜLATÖRÜ";
+  switchView('deneme'); document.querySelector('#view-deneme > .big-card').style.display='none';
+  document.getElementById('ai-loading').style.display='flex';
+  document.getElementById('ai-status-text').innerText=`'${title}' için 5 tuzak soru hazırlanıyor...`;
+  document.getElementById('ai-progress-bar').style.width="50%";
+  try{
+    currentQuizData=await generateQuestions(`AGS'de "${ders}" dersinin "${title}" konusunda adayların sınav stresiyle en çok düştüğü, kelime oyunlu, çeldiricisi çok güçlü TAM 5 tuzak soru üret. Çözümde adayın hangi ayrıntıya aldanacağını da açıkla. Tüm soruların topic alanı "${ders}" olsun.`);
+    if(!currentQuizData.length) throw new Error("Veri gelmedi");
+    document.getElementById('ai-progress-bar').style.width="100%";
+    setTimeout(()=>{ document.getElementById('ai-loading').style.display='none'; document.querySelector('#view-deneme > .big-card').style.display='block';
+      lastQuizMode={type:'trap',topic:title,ders}; initQuizUI(); },400);
+  }catch(e){
+    showError("Olmadı. "+netHatasi(e));
+    document.getElementById('ai-loading').style.display='none'; document.querySelector('#view-deneme > .big-card').style.display='block';
+  }
+}
+function startMistakeQuiz(){
+  if(!MISTAKES.length){ alert("Hata defterin boş! Önce bir test çöz."); return; }
+  currentQuizData=shuffle(MISTAKES.map(x=>Object.assign({},x)));
+  document.getElementById('q-topic-name').innerText="HATA DEFTERİ";
+  lastQuizMode={type:'mistake'}; initQuizUI(); stopTimer();
+}
+function clearMistakes(){ if(confirm("Hata defterindeki tüm sorular silinsin mi?")){ MISTAKES=[]; saveMistakes(); renderMistakes(); } }
+
+// ==================== HATA DEFTERİ: KONU TEŞHİSİ ====================
+// Soru etiketleri 15 konuyla birebir eşleşiyor → tahmin yok, doğrudan eşleme
+const TOPIC2KONU = {
+  "Fen":"fen","Matematik":"matematik","Sanat":"sanat","Müzik":"muzik","Edebiyat":"edebiyat",
+  "Oyun":"oyun","Drama":"drama","Kuramlar":"yaklasimlar","Yaklaşımlar":"temeller",
+  "Okuryazarlık":"okulauyum","Okula Uyum":"okulauyum","Program":"temeller","Temeller":"temeller",
+  "Gelişim":"gelisim","Ruh Sağlığı":"ruhsagligi","Sağlık":"saglik","İlkyardım":"saglik",
+  "Anne-Baba":"annebaba","Aile":"annebaba","Çocuk Hakları":"haklar","Haklar":"haklar"
+};
+// Yedek: AI ürettiği sorularda etiket tutmazsa anahtar kelimeyle bul
+const KONU_KEYS = {
+  fen:["bilimsel süreç","gözlem","tahmin","çıkarım","deney","sınıflandırma","fen ve doğa","mıknatıs","batma","yüzme","merak"],
+  matematik:["sayı kavramı","birebir eşleme","örüntü","sıralama","kardinal","rakam","ölçme","geometri","grafik","eşleştirme","sayma"],
+  sanat:["lowenfeld","karalama","şema öncesi","baş-ayaklı","taban çizgisi","röntgen resim","boyama","resim","kolaj","yaratıcılık","sanat etkinliği"],
+  muzik:["orff","kodály","kodaly","dalcroze","suzuki","ritim","şarkı","beden perküsyon","ksilofon","müzik","ses dinleme"],
+  edebiyat:["kitap seçim","resimli kitap","masal","fabl","tekerleme","öykü","diyalojik","etkileşimli okuma","çocuk edebiyat","şiir"],
+  oyun:["parten","paralel oyun","sembolik oyun","kurallı oyun","iş birlikli","asosiyatif","yalnız oyun","izleyici","oyuncak","oyun"],
+  drama:["doğaçlama","canlandırma","ısınma","donuk imge","pandomim","rol oynama","drama","tiyatro","lider"],
+  yaklasimlar:["pavlov","skinner","thorndike","bandura","pekiştire","ceza","koşullanma","model alma","tolman","gestalt","premack","sönme","bilgiyi işleme","ausubel","bruner","gizil öğrenme","dolaylı pekiştirme"],
+  okulauyum:["fonolojik","sesbilgisel","okuma yazmaya hazırlık","erken okuryazarlık","yazı farkındalığı","alfabe","okula uyum","ayrılık kaygısı","görsel algı","ilk ses","uyak"],
+  temeller:["montessori","reggio","highscope","high scope","waldorf","fröbel","frobel","dewey","rousseau","pestalozzi","comenius","head start","hazırlanmış çevre","planla-yap","100 dil","meb programı","bütünleştirilmiş","günlük eğitim akışı","eklektik","kazanım"],
+  gelisim:["piaget","erikson","kohlberg","vygotsky","freud","korunum","benmerkez","animizm","nesne süreklilik","yakınsak","yapı iskelesi","özerklik","girişimcilik","ahlaki","bronfenbrenner","bağlanma","işlem öncesi","özümleme","gardner"],
+  ruhsagligi:["öfke nöbeti","tantrum","parmak emme","tırnak yeme","enürezis","altını ıslat","kardeş kıskançlık","saldırganlık","ısırma","utangaç","mutizm","dehb","gerileme","regresyon","davranış problem","etiket"],
+  saglik:["ilkyardım","yanık","boğulma","heimlich","kanama","havale","zehirlenme","bayılma","kırık","aşı","beslenme","el yıkama","bulaşıcı","112","kaza"],
+  annebaba:["baumrind","demokratik tutum","otoriter","izin verici","ilgisiz","aşırı koruyucu","tutarsız","aile katılımı","veli","ev ziyareti","anne-baba eğitim"],
+  haklar:["çocuk hakları","1989","1995","yüksek yarar","katılım hakkı","ihmal","istismar","bildirim","hak ihlali","sözleşme","183"]
+};
+function guessKonu(q){
+  let id = TOPIC2KONU[(q.topic||'').trim()];
+  if(!id){
+    const text=((q.q||'')+' '+((q.options||[]).join(' '))+' '+(q.exp||'')).toLocaleLowerCase('tr');
+    let best=null,bs=0;
+    TOPICS.forEach(tp=>{ let sc=0; (KONU_KEYS[tp.id]||[]).forEach(k=>{ if(text.indexOf(k)!==-1) sc+=(k.length>10?2:1); });
+      if(text.indexOf(tp.title.toLocaleLowerCase('tr'))!==-1) sc+=4;
+      if(sc>bs){bs=sc;best=tp;} });
+    id = best?best.id:TOPICS[0].id;
+  }
+  const tp=TOPICS.find(x=>x.id===id)||TOPICS[0];
+  const cat=CATS.find(c=>c.key===tp.cat);
+  return { ders: cat?cat.name:'Genel', konu: tp.title, konuId: tp.id };
+}
+function groupMistakes(){
+  const g={};
+  MISTAKES.forEach(m=>{
+    const d=m.ders||'Genel', k=m.konu||'Genel', id=m.konuId||'genel';
+    if(!g[d]) g[d]={};
+    if(!g[d][k]) g[d][k]={ id, items:[] };
+    g[d][k].items.push(m);
+  });
+  return g;
+}
+
+// ==================== HATA DEFTERİ EKRANI (ders → konu gruplu) ====================
+function renderMistakes(){
+  const box=document.getElementById('hata-list');
+  if(!MISTAKES.length){
+    box.innerHTML='<div class="big-card"><div class="text-6xl mb-3">📖</div><p class="font-black text-gray-700 mb-1">Defter tertemiz!</p><p class="text-sm font-bold text-gray-500">Bir test çözdüğünde yanlışların ders ve konu başlığıyla otomatik olarak buraya eklenecek.</p></div>';
+    return;
+  }
+  const letters=['A','B','C','D','E'];
+  const g=groupMistakes();
+  let html=`<div class="bg-white rounded-2xl p-4 mb-4 shadow border-2 border-slate-100">
+    <p class="text-xs font-black text-slate-700 mb-2">📌 TOPLAM ${MISTAKES.length} HATA · ${Object.keys(g).length} DERS</p>`;
+  Object.keys(g).forEach(d=>{
+    const n=Object.values(g[d]).reduce((a,x)=>a+x.items.length,0);
+    html+=`<span class="inline-block bg-rose-50 text-rose-700 border border-rose-200 font-black text-[.7rem] px-2 py-1 rounded-full mr-1 mb-1">${d}: ${n}</span>`;
+  });
+  html+='</div>';
+
+  Object.keys(g).forEach(ders=>{
+    const cat=CATS.find(c=>c.name===ders);
+    const total=Object.values(g[ders]).reduce((a,x)=>a+x.items.length,0);
+    html+=`<div class="cat-header" style="background:${cat?cat.grad:'linear-gradient(135deg,#64748b,#334155)'}">
+      <span class="cat-emoji">${cat?cat.emoji:'📕'}</span>
+      <span class="cat-name">${ders}</span>
+      <span class="cat-count">${total} hata</span>
+    </div>`;
+    Object.keys(g[ders]).forEach(konu=>{
+      const grp=g[ders][konu], id=grp.id;
+      const diag=DIAGNOSIS[id];
+      html+=`<div class="topic-card open" style="border-color:#fecdd3">
+        <div class="topic-head" style="cursor:default">
+          <div class="t-icon" style="background:#fff1f2">🩹</div>
+          <div class="t-title">${konu} <span style="color:#e11d48; font-size:.75rem">· ${grp.items.length} hata</span></div>
+        </div>
+        <div class="topic-body" style="max-height:none; padding:0 1.1rem 1.1rem">`;
+      grp.items.forEach(m=>{
+        html+=`<div class="review-item wrong">
+          <div class="review-q">${m.q}</div>
+          ${(typeof m.myAnswer==='number')?`<div class="review-a" style="color:#dc2626">✗ Senin cevabın: ${letters[m.myAnswer]}) ${m.options[m.myAnswer]}</div>`:'<div class="review-a" style="color:#64748b">⊘ Boş bıraktın</div>'}
+          <div class="review-a" style="color:#059669">✔ Doğru: ${letters[m.correct]}) ${m.options[m.correct]}</div>
+          ${m.exp?`<div class="review-a" style="color:#334155; font-weight:600; margin-top:4px">💡 ${m.exp}</div>`:''}
+        </div>`;
+      });
+      html+=`<button class="action-btn" id="diagbtn-${id}" style="background:linear-gradient(135deg,#7c3aed,#4c1d95); color:#fff; margin-top:.9rem;" onclick="explainKonuAI('${id}')">
+          ${diag?'<i class="fas fa-rotate mr-1"></i> Anlatımı Yenile':'<i class="fas fa-stethoscope mr-1"></i> Röntgenimi Çek + Uzun Konu Anlatımı Ver'}
+        </button>
+        <button class="action-btn" style="background:#ecfdf5; color:#047857; border:2px solid #6ee7b7; margin-top:.6rem;" onclick="openTopicChat('${konu.replace(/'/g,"\\'")}')">💬 Bu Konuyu Hoca ile Konuş</button>
+        <div id="diag-${id}" class="deep-dive-content" style="${diag?'display:block':'display:none'}">${diag||''}</div>
+      </div></div>`;
+    });
+  });
+  box.innerHTML=html;
+}
+
+// ==================== RÖNTGEN + İLAÇ (uzun AI konu anlatımı) ====================
+function konuPrompt(id){
+  const t=TOPICS.find(x=>x.id===id);
+  const cat=CATS.find(c=>c.key===(t?t.cat:''));
+  const mine=MISTAKES.filter(m=>m.konuId===id);
+  const L=['A','B','C','D','E'];
+  const list=mine.map((m,i)=>`${i+1}) Soru: ${m.q}\n   Öğrencinin cevabı: ${(typeof m.myAnswer==='number')?L[m.myAnswer]+') '+m.options[m.myAnswer]:'BOŞ'}\n   Doğru cevap: ${L[m.correct]}) ${m.options[m.correct]}`).join('\n');
+  return `Bu öğrenci 2026 ÖABT'ye hazırlanıyor ve "${cat?cat.name:''}" dersinin "${t?t.title:id}" konusunda aşağıdaki soruları YANLIŞ yaptı:
+
+${list}
+
+Görevin: Bu konuyu bu öğrencinin bir daha asla yanlış yapmayacağı şekilde SIFIRDAN, UZUN ve DERİNLEMESİNE anlat. Önce hatalarının röntgenini çek, sonra ilacını ver.
+SADECE HTML kullan (<h4>, <b>, <ul>, <li>, <table>, <tr>, <th>, <td>, <br>). Markdown (*, #) KULLANMA. Şu yapıda yaz:
+
+<h4>🩻 RÖNTGEN — Neyi Kaçırıyorsun?</h4>
+(Yukarıdaki yanlışlarına tek tek bakarak ortak kök nedeni teşhis et. "Şu ayrımı karıştırıyorsun" gibi net ol. Her yanlış için kısa bir madde.)
+
+<h4>💊 İLAÇ — Konunun Tam Anlatımı</h4>
+(Konuyu en temelden başlayarak, bol örnekle, uzun uzun anlat. Gerekiyorsa tablo kullan. Hiçbir kritik ayrıntıyı atlama. Bu bölüm uzun olsun.)
+
+<h4>⚔️ Karıştırılan Kavramlar</h4>
+(Bu konuda birbirine en çok karışan kavramları tablo hâlinde ayır.)
+
+<h4>🚨 ÖSYM Tuzakları</h4>
+(Bu konuda ÖSYM'nin kurduğu tuzaklar, madde madde.)
+
+<h4>🧠 Akılda Kalsın</h4>
+(Ezber şifreleri, kısayollar, altın kurallar.)
+
+<h4>✍️ Kendini Test Et</h4>
+(Bu konudan 3 mini soru ve hemen altında cevapları + kısa çözümleri.)`;
+}
+async function explainKonuAI(id){
+  if(!requireKey()) return;
+  const btn=document.getElementById('diagbtn-'+id), box=document.getElementById('diag-'+id);
+  if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin mr-1"></i> Hoca dosyanı inceliyor...'; }
+  box.style.display='block'; box.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
+  try{
+    const t=await callText(konuPrompt(id), HOCA_PERSONA+" Bu görevde İSTİSNA olarak uzun yaz: öğrencinin konuyu sıfırdan öğrenmesi gerekiyor, detaydan kaçınma.");
+    box.innerHTML=t; DIAGNOSIS[id]=t; saveDiagnosis();
+    if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-rotate mr-1"></i> Anlatımı Yenile'; }
+  }catch(e){
+    box.innerHTML='<span style="color:#dc2626; font-weight:800">Hoca meşgul ('+(e.message||'hata')+'). Tekrar dene.</span>';
+    if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-redo mr-1"></i> Tekrar Dene'; }
+  }
+}
+async function diagnoseAll(){
+  if(!requireKey()) return;
+  if(!MISTAKES.length){ alert("Hata defterin boş."); return; }
+  const g=groupMistakes();
+  const ids=[]; Object.keys(g).forEach(d=>Object.keys(g[d]).forEach(k=>ids.push(g[d][k].id)));
+  const st=document.getElementById('diag-status'), btn=document.getElementById('btn-diagnose-all');
+  st.style.display='block'; btn.disabled=true;
+  let done=0;
+  for(const id of ids){
+    done++;
+    const t=TOPICS.find(x=>x.id===id);
+    st.innerHTML=`<i class="fas fa-spinner fa-spin mr-1"></i> ${done}/${ids.length} · "${t?t.title:id}" anlatılıyor...`;
+    try{
+      const txt=await callText(konuPrompt(id), HOCA_PERSONA+" Bu görevde İSTİSNA olarak uzun yaz: öğrencinin konuyu sıfırdan öğrenmesi gerekiyor, detaydan kaçınma.");
+      DIAGNOSIS[id]=txt; saveDiagnosis();
+    }catch(e){ /* bu konuyu atla */ }
+    await sleep(600);
+  }
+  st.innerHTML=`<i class="fas fa-check-circle mr-1"></i> Bitti! ${ids.length} konunun röntgeni ve anlatımı hazır. Artık "HTML İndir" ile hepsini kaydedebilirsin.`;
+  btn.disabled=false; renderMistakes();
+  setTimeout(()=>{ st.style.display='none'; },6000);
+}
+
+// ==================== HTML OLARAK DIŞA AKTAR ====================
+function exportMistakesHTML(){
+  if(!MISTAKES.length){ alert("Hata defterin boş, dışa aktarılacak bir şey yok."); return; }
+  const letters=['A','B','C','D','E'];
+  const g=groupMistakes();
+  const now=new Date();
+  const tarih=now.toLocaleDateString('tr-TR')+' '+now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+  const diagCount=Object.keys(g).reduce((a,d)=>a+Object.values(g[d]).filter(x=>DIAGNOSIS[x.id]).length,0);
+  let body='';
+  Object.keys(g).forEach(ders=>{
+    const cat=CATS.find(c=>c.name===ders);
+    const total=Object.values(g[ders]).reduce((a,x)=>a+x.items.length,0);
+    body+=`<div class="ders" style="background:${cat?cat.grad:'#334155'}"><span class="e">${cat?cat.emoji:'📕'}</span><span class="n">${ders}</span><span class="c">${total} hata</span></div>`;
+    Object.keys(g[ders]).forEach(konu=>{
+      const grp=g[ders][konu];
+      body+=`<div class="konu"><h2>🩹 ${konu} <small>· ${grp.items.length} hata</small></h2>`;
+      grp.items.forEach((m,i)=>{
+        body+=`<div class="soru">
+          <div class="sq"><b>${i+1}.</b> ${m.q}</div>
+          <ol class="opts">${m.options.map((o,j)=>`<li class="${j===m.correct?'ok':(j===m.myAnswer?'no':'')}">${letters[j]}) ${o}</li>`).join('')}</ol>
+          ${(typeof m.myAnswer==='number')?`<div class="a no">✗ Senin cevabın: ${letters[m.myAnswer]}</div>`:'<div class="a bo">⊘ Boş bıraktın</div>'}
+          <div class="a ok">✔ Doğru cevap: ${letters[m.correct]}</div>
+          ${m.exp?`<div class="exp">💡 ${m.exp}</div>`:''}
+        </div>`;
+      });
+      if(DIAGNOSIS[grp.id]) body+=`<div class="diag"><div class="diag-h">🩻 RÖNTGEN + 💊 İLAÇ · AI Konu Anlatımı</div>${DIAGNOSIS[grp.id]}</div>`;
+      else body+=`<div class="nodiag">ℹ️ Bu konu için henüz AI konu anlatımı üretilmedi. Uygulamada <b>"Röntgenimi Çek + Uzun Konu Anlatımı Ver"</b> butonuna basıp tekrar dışa aktarırsan burada yer alır.</div>`;
+      body+='</div>';
+    });
+  });
+  const html=`<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ÖABT 2026 · Hata Defterim (${tarih})</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+*{box-sizing:border-box}
+body{font-family:'Nunito',system-ui,sans-serif;background:#f8fafc;color:#0f172a;margin:0;padding:0 0 4rem;line-height:1.6}
+header{background:linear-gradient(135deg,#0f172a,#312e81);color:#fff;padding:2.2rem 1.2rem;text-align:center}
+header h1{margin:0 0 .4rem;font-size:1.7rem;font-weight:900;letter-spacing:-.5px}
+header p{margin:0;font-size:.85rem;font-weight:700;color:#c7d2fe}
+.wrap{max-width:860px;margin:0 auto;padding:1.5rem 1rem}
+.ozet{background:#fff;border:2px solid #e2e8f0;border-radius:1.2rem;padding:1rem;margin-bottom:1.5rem;font-weight:800;font-size:.85rem}
+.ozet span{display:inline-block;background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;padding:.25rem .7rem;border-radius:2rem;margin:.15rem .2rem;font-size:.75rem}
+.ders{display:flex;align-items:center;gap:.7rem;color:#fff;font-weight:900;padding:.9rem 1.1rem;border-radius:1.2rem;margin:2rem 0 .9rem}
+.ders .e{font-size:1.4rem}.ders .n{flex:1}
+.ders .c{background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.35);padding:.25rem .7rem;border-radius:2rem;font-size:.72rem}
+.konu{background:#fff;border:2px solid #fecdd3;border-radius:1.3rem;padding:1.1rem;margin-bottom:1.1rem}
+.konu h2{margin:0 0 .8rem;font-size:1.05rem;font-weight:900;color:#9f1239}
+.konu h2 small{color:#e11d48;font-weight:800}
+.soru{border-left:4px solid #ef4444;background:#fff7f7;border-radius:.7rem;padding:.8rem .9rem;margin-bottom:.8rem}
+.sq{font-weight:800;font-size:.9rem;margin-bottom:.5rem}
+.opts{list-style:none;margin:0 0 .5rem;padding:0}
+.opts li{font-size:.85rem;font-weight:700;padding:.25rem .5rem;border-radius:.4rem;margin-bottom:.15rem}
+.opts li.ok{background:#dcfce7;color:#166534}
+.opts li.no{background:#fee2e2;color:#991b1b;text-decoration:line-through}
+.a{font-size:.8rem;font-weight:900}.a.ok{color:#059669}.a.no{color:#dc2626}.a.bo{color:#64748b}
+.exp{margin-top:.4rem;font-size:.82rem;font-weight:600;background:#fff;border:1px dashed #cbd5e1;border-radius:.5rem;padding:.5rem .6rem}
+.diag{margin-top:1rem;background:#f5f3ff;border:2px solid #ddd6fe;border-radius:1rem;padding:1rem;font-size:.88rem}
+.diag-h{font-weight:900;color:#5b21b6;margin-bottom:.7rem;font-size:.8rem;letter-spacing:.5px}
+.diag h4{color:#4c1d95;font-weight:900;margin:1.1rem 0 .4rem;font-size:.95rem}
+.diag table{width:100%;border-collapse:collapse;margin:.6rem 0;font-size:.8rem}
+.diag th,.diag td{border:1px solid #ddd6fe;padding:.4rem .5rem;text-align:left}
+.diag th{background:#ede9fe;font-weight:900}
+.diag ul{margin:.4rem 0 .4rem 1.1rem;padding:0}
+.nodiag{margin-top:.8rem;background:#f1f5f9;border:1px dashed #cbd5e1;border-radius:.8rem;padding:.7rem;font-size:.78rem;font-weight:700;color:#475569}
+footer{text-align:center;font-size:.75rem;font-weight:700;color:#94a3b8;margin-top:2.5rem}
+@media print{ body{background:#fff} .ders{-webkit-print-color-adjust:exact;print-color-adjust:exact} }
+</style></head><body>
+<header><h1>🩺 Hata Defterim · ÖABT 2026</h1><p>Ders ve konu başlığına göre gruplanmış · ${tarih}</p></header>
+<div class="wrap">
+<div class="ozet">📊 Toplam <b>${MISTAKES.length}</b> hata · <b>${Object.keys(g).length}</b> ders · AI konu anlatımı üretilen konu sayısı: <b>${diagCount}</b><br>
+${Object.keys(g).map(d=>`<span>${d}: ${Object.values(g[d]).reduce((a,x)=>a+x.items.length,0)}</span>`).join('')}</div>
+${body}
+<footer>ÖABT 2026 Zirve · Bu dosya çevrimdışı açılabilir, yazdırılabilir (Ctrl+P → PDF).</footer>
+</div></body></html>`;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const ds=now.toISOString().slice(0,10);
+  a.href=url; a.download=`OABT-Hata-Defterim-${ds}.html`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+
+// ==================== QUIZ UI ====================
+function initQuizUI(){ qIndex=0; userAnswers=new Array(currentQuizData.length).fill(null); switchView('quiz'); setTimeout(renderQuestion,50); }
+function renderQuestion(){
+  if(!currentQuizData.length) return;
+  const q=currentQuizData[qIndex], ans=userAnswers[qIndex];
+  document.getElementById('q-counter').innerText=`Soru ${qIndex+1}/${currentQuizData.length}`;
+  document.getElementById('progress-bar').style.width=((qIndex+1)/currentQuizData.length*100)+'%';
+  document.getElementById('q-text').innerHTML=String(q.q).replace(/\n/g,'<br>');
+  const L=['A','B','C','D','E','F']; let h='';
+  q.options.forEach((o,i)=>{
+    let cls=''; if(ans!==null){ if(i===q.correct) cls='correct'; else if(i===ans) cls='wrong'; }
+    h+=`<button class="opt-btn ${cls}" onclick="selectAnswer(${i})" ${ans!==null?'disabled':''}><div class="opt-letter">${L[i]}</div><div class="opt-text">${o}</div></button>`;
+  });
+  document.getElementById('q-options').innerHTML=h;
+  const exp=document.getElementById('q-exp'), dd=document.getElementById('btn-deep-dive');
+  document.getElementById('deep-dive-content').style.display='none';
+  document.getElementById('chat-wrap').style.display='none';
+  if(ans!==null){
+    exp.innerHTML=`💡 <b>Çözüm:</b> ${q.exp||'—'}`; exp.style.display='block';
+    dd.style.display='flex'; dd.innerHTML='<i class="fas fa-chalkboard-teacher text-xl"></i> Anlamadım — AI\'dan Özel Ders Al'; dd.disabled=false;
+  } else { exp.style.display='none'; dd.style.display='none'; }
+  document.getElementById('btn-next').innerHTML=(qIndex===currentQuizData.length-1)?'Bitir <i class="fas fa-flag-checkered ml-1"></i>':'İleri <i class="fas fa-arrow-right ml-1"></i>';
+}
+function selectAnswer(i){ if(userAnswers[qIndex]!==null) return; userAnswers[qIndex]=i; renderQuestion(); }
+function changeQ(d){
+  if(d===1 && qIndex===currentQuizData.length-1){ finishQuiz(); return; }
+  if(qIndex+d>=0 && qIndex+d<currentQuizData.length){ qIndex+=d; renderQuestion(); window.scrollTo(0,0); }
+}
+
+// ==================== AI ÖZEL DERS + CANLI SOHBET ====================
+const HOCA_PERSONA = "Sen 20 yıllık, alanında efsane bir KPSS ÖABT Okul Öncesi Öğretmenliği hocasısın. Adın 'Hoca'. Karşındaki kişi 2026 ÖABT'ye hazırlanan bir okul öncesi öğretmeni adayı ve 50/50 hedefliyor. Tarzın: çok samimi, esprili, gaz veren; öğrencine 'sen' diye hitap edersin. Konuyu ASLA kuru kuruya tanımlamazsın — anaokulu sınıfından, günlük hayattan çarpıcı örnekler verir, HİKÂYELEŞTİRİR, benzetme kurar, akılda kalıcı şifreler üretirsin. 'ÖSYM seni burada nasıl düşürür, neye dikkat edeceksin?' demeyi seversin. Sadece <b>, <i>, <ul>, <li>, <br>, <table>, <tr>, <th>, <td> HTML etiketleri kullan; Markdown (*, #) ASLA kullanma. Bilmediğini uydurmazsın.";
+function ctxLine(){
+  if(!chatContext) return "";
+  if(chatContext.type==='question'){
+    const L=['A','B','C','D','E'];
+    return `\n\n--- ŞU AN KONUŞULAN SORU ---\nDers: ${chatContext.topic}\nSoru: ${chatContext.q}\nSeçenekler: ${chatContext.options.map((o,i)=>L[i]+') '+o).join(' | ')}\nDoğru cevap: ${L[chatContext.correct]}) ${chatContext.options[chatContext.correct]}\nKısa çözüm: ${chatContext.exp||'-'}\n--- Öğrencinin soruları bu soru ve konusuyla ilgilidir. ---`;
+  }
+  return `\n\n--- ŞU AN KONUŞULAN KONU ---\nÖABT konusu: ${chatContext.title}\n--- Öğrencinin soruları bu konuyla ilgilidir. ---`;
+}
+function addBubble(role, html){
+  const log=document.getElementById('chat-log');
+  const d=document.createElement('div'); d.className='bubble '+(role==='ai'?'ai':'me'); d.innerHTML=html;
+  log.appendChild(d); log.scrollTop=log.scrollHeight; return d;
+}
+function renderChatSuggestions(list){
+  const s=document.getElementById('chat-sugg');
+  s.innerHTML=list.map(t=>`<button onclick="askSuggestion(this)">${t}</button>`).join('');
+}
+function askSuggestion(btn){ document.getElementById('chat-input').value=btn.innerText; sendChat(); }
+function openChatUI(introHTML, suggestions){
+  chatHistory=[];
+  document.getElementById('chat-log').innerHTML='';
+  addBubble('ai', introHTML);
+  chatHistory.push({role:'ai', text:introHTML});
+  renderChatSuggestions(suggestions);
+  const w=document.getElementById('chat-wrap'); w.style.display='block';
+  setTimeout(()=>w.scrollIntoView({behavior:'smooth',block:'center'}),120);
+}
+// Konu kartından sohbet başlat
+function openTopicChat(title){
+  if(!requireKey()) return;
+  chatContext={type:'topic', title};
+  const box=document.getElementById('chat-wrap');
+  // Konu ekranında sohbeti quiz kartından çıkarıp geçici olarak konu altına taşımıyoruz; quiz görünümüne alıp bağlam kuruyoruz
+  switchView('quiz');
+  document.getElementById('q-counter').innerText='💬 Sohbet';
+  document.getElementById('q-topic-name').innerText='HOCA';
+  document.getElementById('progress-bar').style.width='100%';
+  document.getElementById('q-text').innerHTML=`<b>${title}</b> konusunu hocanla konuşuyorsun. Aklına takılan her şeyi sorabilirsin.`;
+  document.getElementById('q-options').innerHTML='';
+  document.getElementById('q-exp').style.display='none';
+  document.getElementById('btn-deep-dive').style.display='none';
+  document.getElementById('deep-dive-content').style.display='none';
+  stopTimer();
+  openChatUI(`Merhaba! 👋 <b>${title}</b> konusundayız. Neresi tam oturmadıysa çekinmeden sor — istersen en baştan anlatayım, istersen sadece takıldığın kavramı açayım.`,
+    ["Bu konuyu en baştan anlat","En çok hangi tuzağa düşülür?","Bir örnek soru çöz ve anlat"]);
+}
+// Sorudan özel ders (mevcut buton) → ardından canlı sohbet açılır
+async function getDeepDiveAI(){
+  if(!requireKey()) return;
+  const btn=document.getElementById('btn-deep-dive'), box=document.getElementById('deep-dive-content'), q=currentQuizData[qIndex];
+  btn.innerHTML='<i class="fas fa-spinner fa-spin text-xl"></i> Özel derse çevriliyor...'; btn.disabled=true;
+  const L=['A','B','C','D','E'];
+  const bilgi = `Ders: ${q.topic}
+Soru: ${q.q}
+Seçenekler: ${q.options.map((o,i)=>L[i]+') '+o).join(' | ')}
+Doğru cevap: ${L[q.correct]}) ${q.options[q.correct]}
+Kısa çözüm: ${q.exp||'-'}`;
+  try{
+    const txt = await callText(`Öğrenci şu ÖABT sorusunda zorlandı:
+
+${bilgi}
+
+Bu sorunun ait olduğu konuyu, öğrencinin hafızasına KAZINACAK şekilde anlat. Kuru tanım yapma; günlük hayattan çarpıcı örnekler ver, hikâyeleştir, benzetme kur. Şunları mutlaka içersin (başlık şablonuna sıkışma, akıcı anlat):
+- Bu sorunun dayandığı konunun özü ve mantığı, sıfırdan
+- Doğru cevaba adım adım nasıl gidilir
+- Hangi çeldirici cazip ve neden yanlış
+- "ÖSYM seni burada nasıl düşürür, neye dikkat edeceksin?"
+- Sonunda tek cümlelik, akılda kalıcı bir ALTIN KURAL
+Çok samimi ve motive edici bir dille, doyurucu uzunlukta yaz.`, HOCA_PERSONA);
+    box.innerHTML=`<div class="flex items-center justify-between mb-3 border-b-2 border-indigo-100 pb-2">
+      <h4 class="m-0"><i class="fas fa-graduation-cap mr-2"></i> AI Özel Ders</h4>
+      <button onclick="closeDeepDive()" class="text-red-500 font-bold px-3 py-1 bg-red-50 rounded">Kapat</button></div>${txt}`;
+    box.style.display='block'; btn.style.display='none';
+    setTimeout(()=>box.scrollIntoView({behavior:'smooth',block:'center'}),100);
+    chatContext={type:'question', topic:q.topic, q:q.q, options:q.options, correct:q.correct, exp:q.exp};
+    openChatUI("Buraya kadar her şey oturdu mu? 💬 <b>Şimdi bana canlı olarak sorabilirsin</b> — bir kavramı, bir dönemi, bir şıkkı, aklına ne takıldıysa. Çekinme, en aptalca sandığın soru bile burada makbuldür.",
+      ["Şu kavramı biraz daha aç","Neden diğer şık olmuyor?","Buna benzer bir soru daha sor"]);
+  }catch(e){ btn.innerHTML='<i class="fas fa-exclamation-triangle text-xl"></i> Hata! Tekrar Dene'; btn.disabled=false; box.style.display='none'; }
+}
+function closeDeepDive(){
+  document.getElementById('deep-dive-content').style.display='none';
+  document.getElementById('chat-wrap').style.display='none';
+  const b=document.getElementById('btn-deep-dive');
+  b.style.display='flex'; b.disabled=false;
+  b.innerHTML='<i class="fas fa-chalkboard-teacher text-xl"></i> Anlamadım — AI\'dan Özel Ders Al';
+}
+// Canlı mesaj gönder
+async function sendChat(){
+  const inp=document.getElementById('chat-input'), send=document.getElementById('chat-send');
+  const text=inp.value.trim(); if(!text) return;
+  if(!requireKey()) return;
+  inp.value=''; inp.disabled=true; send.disabled=true;
+  addBubble('me', text.replace(/</g,'&lt;'));
+  chatHistory.push({role:'user', text});
+  document.getElementById('chat-sugg').innerHTML='';
+  const typing=addBubble('ai','<div class="typing"><span></span><span></span><span></span></div>');
+  try{
+    const sys=HOCA_PERSONA+" Bu bir SOHBET: sorulan şeye odaklan, gereksiz uzatma ama gerekiyorsa örnek vermekten çekinme."+ctxLine();
+    const reply=await callChat(chatHistory, sys);
+    typing.innerHTML=reply;
+    chatHistory.push({role:'ai', text:reply});
+    if(chatHistory.length>24) chatHistory=chatHistory.slice(-24);
+    renderChatSuggestions(["Biraz daha basit anlatır mısın?","Örnek verir misin?","Bunu nasıl akılda tutarım?"]);
+  }catch(e){
+    typing.innerHTML='<span style="color:#dc2626; font-weight:800">Bağlantı hatası ('+(e.message||'?')+'). Tekrar sor.</span>';
+  }finally{
+    inp.disabled=false; send.disabled=false; inp.focus();
+    document.getElementById('chat-log').scrollTop=document.getElementById('chat-log').scrollHeight;
+  }
+}
+
+// ==================== SONUÇ ====================
+function finishQuiz(auto){
+  if(!auto && !confirm("Testi bitirmek istediğine emin misin?")) return;
+  stopTimer();
+  let d=0,y=0,b=0;
+  const perf={};
+  currentQuizData.forEach((q,i)=>{
+    const t=q.topic||'Genel';
+    if(!perf[t]) perf[t]={d:0,total:0};
+    perf[t].total++;
+    if(userAnswers[i]===null){ b++; }
+    else if(userAnswers[i]===q.correct){ d++; perf[t].d++; }
+    else { y++; }
+    if(userAnswers[i]!==q.correct){
+      if(!MISTAKES.some(m=>m.q===q.q)){
+        const kk=guessKonu(q);
+        MISTAKES.push({topic:t,ders:kk.ders,konu:kk.konu,konuId:kk.konuId,q:q.q,options:q.options,correct:q.correct,exp:q.exp,myAnswer:userAnswers[i],date:Date.now()});
+      }
+    }
+  });
+  let net=d-(y*0.25); if(net<0) net=0;
+  const total=currentQuizData.length, pct=total?Math.round((net/total)*100):0;
+  saveMistakes();
+  document.getElementById('res-d').innerText=d;
+  document.getElementById('res-y').innerText=y;
+  document.getElementById('res-b').innerText=b;
+  document.getElementById('res-net').innerText=net.toFixed(2).replace('.',',');
+  document.getElementById('score-circle').style.setProperty('--pct',pct+'%');
+  // Ders ders analiz
+  const bars=document.getElementById('subj-bars'); let bh='';
+  Object.keys(perf).forEach(t=>{
+    const p=Math.round(perf[t].d/perf[t].total*100);
+    const col = p>=75?'linear-gradient(90deg,#22c55e,#15803d)' : p>=50?'linear-gradient(90deg,#f59e0b,#b45309)' : 'linear-gradient(90deg,#ef4444,#b91c1c)';
+    bh+=`<div class="subj-row"><div class="subj-name">${t}</div><div class="subj-bar"><div class="subj-fill" style="width:${p}%; background:${col}"></div></div><div class="subj-val">${perf[t].d}/${perf[t].total}</div></div>`;
+  });
+  bars.innerHTML=bh;
+  document.getElementById('subj-analysis').style.display = Object.keys(perf).length>1 ? 'block' : 'none';
+  const m=document.getElementById('res-msg');
+  if(pct>=90){ m.innerHTML="🏆 Zirvedesin! Bu tempoyla 80/80 hayal değil."; m.style.cssText="background:#dcfce7; color:#166534; border-color:#86efac"; }
+  else if(pct>=70){ m.innerHTML="💪 Çok iyi! Eksiklerini kapatırsan tepeye çok yakınsın."; m.style.cssText="background:#dbeafe; color:#1e40af; border-color:#93c5fd"; }
+  else if(pct>=50){ m.innerHTML="📈 Temel var, tekrar şart. Zayıf dersini yukarıdaki grafikten seç ve konuya dön."; m.style.cssText="background:#fef3c7; color:#92400e; border-color:#fcd34d"; }
+  else { m.innerHTML="🔥 Panik yok — burası başlangıç. Yanlışların hata defterine düştü, oradan tekrar çöz."; m.style.cssText="background:#fee2e2; color:#991b1b; border-color:#fca5a5"; }
+  document.getElementById('coach-content').style.display='none';
+  document.getElementById('coach-content').innerHTML='';
+  const bc=document.getElementById('btn-ai-coach'); bc.disabled=false; bc.style.display='block'; bc.innerHTML='✨ AI Koçtan Kişisel Analiz Al';
+  document.getElementById('review-box').style.display='none';
+  switchView('result');
+}
+function toggleReview(){
+  const box=document.getElementById('review-box');
+  if(box.style.display==='block'){ box.style.display='none'; return; }
+  const L=['A','B','C','D','E'];
+  let html='';
+  currentQuizData.forEach((q,i)=>{
+    if(userAnswers[i]===q.correct) return;
+    const empty=userAnswers[i]===null;
+    html+=`<div class="review-item ${empty?'empty':'wrong'}">
+      <div class="text-[.65rem] font-black text-gray-400 uppercase mb-1">${i+1}. Soru · ${q.topic||''}</div>
+      <div class="review-q">${q.q}</div>
+      ${empty?'<div class="review-a" style="color:#64748b">⊘ Boş bıraktın</div>':`<div class="review-a" style="color:#dc2626">✗ Senin cevabın: ${L[userAnswers[i]]}) ${q.options[userAnswers[i]]}</div>`}
+      <div class="review-a" style="color:#059669">✔ Doğru cevap: ${L[q.correct]}) ${q.options[q.correct]}</div>
+      ${q.exp?`<div class="review-a" style="color:#334155; font-weight:600; margin-top:5px">💡 ${q.exp}</div>`:''}
+    </div>`;
+  });
+  box.innerHTML = html || '<div class="big-card"><div class="text-5xl mb-2">🎉</div><p class="font-black text-green-700">Hiç yanlışın ve boşun yok. Kusursuz!</p></div>';
+  box.style.display='block';
+}
+async function getAICoach(){
+  if(!requireKey()) return;
+  const btn=document.getElementById('btn-ai-coach'), box=document.getElementById('coach-content');
+  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Rapor hazırlanıyor...'; btn.disabled=true; box.style.display='block';
+  box.innerHTML='<div class="text-center"><i class="fas fa-brain fa-spin text-emerald-500 text-3xl mb-2"></i><br>Performansın analiz ediliyor...</div>';
+  let stats={}; currentQuizData.forEach((q,i)=>{ const t=q.topic||'Genel'; if(!stats[t]) stats[t]={t:0,c:0}; stats[t].t++; if(userAnswers[i]===q.correct) stats[t].c++; });
+  let weak=[],strong=[]; Object.keys(stats).forEach(k=>{ const p=stats[k].c/stats[k].t; if(p<0.5) weak.push(k); else if(p>=0.8) strong.push(k); });
+  const rapor=Object.keys(stats).map(k=>`${k}: ${stats[k].c}/${stats[k].t}`).join(' · ');
+  const net=document.getElementById('res-net').innerText;
+  try{
+    const txt=await callText(`Öğrencin bir ÖABT denemesi çözdü. Net: ${net}/${currentQuizData.length}. Ders ders sonucu: ${rapor}. Güçlü olduğu dersler: ${strong.join(', ')||'belirsiz'}. Zayıf olduğu dersler: ${weak.join(', ')||'yok, harika'}.
+
+ÖABT Okul Öncesi denemesinde konu ağırlıkları şöyle: Gelişim 8, Oyun 4, Program 4, Kuramlar 4, Okuryazarlık 4, Ruh Sağlığı 4, Fen 3, Matematik 3, Sağlık 3, Anne-Baba 3, Sanat 2, Müzik 2, Drama 2, Edebiyat 2, Çocuk Hakları 2 (toplam 50, süre 75 dk, 4 yanlış 1 doğruyu götürür).
+
+Bu öğrenciye özel bir "Kişisel Çalışma Planı ve Motivasyon" yaz. Motive edici ve esprili ol. Zayıf derslerine nokta atışı taktikler ver. Hangi derse yüklenmenin kaç net kazandıracağını ağırlıklara bakarak somut söyle. Boş bıraktıklarıyla ilgili -0,25 stratejisine de değin.`, HOCA_PERSONA);
+    box.innerHTML=`<div class="flex items-center mb-3 border-b-2 border-emerald-200 pb-2"><h4 class="m-0"><i class="fas fa-clipboard-list mr-2"></i> AI Koçluk Raporu</h4></div>${txt}`;
+    btn.style.display='none';
+  }catch(e){ btn.innerHTML='✨ AI Koçtan Kişisel Analiz Al'; btn.disabled=false; box.innerHTML='<i class="fas fa-exclamation-triangle text-red-500"></i> Hata! Tekrar dene.'; }
+}
+async function getFourteenDayPlan(){
+  if(!requireKey()) return;
+  const box=document.getElementById('fourteen-day-plan'); box.classList.remove('hidden'); box.style.display='block';
+  box.innerHTML='<div class="text-center"><i class="fas fa-fire fa-spin text-orange-500 text-3xl mb-2"></i><br>Sana özel acil eylem planı çıkarılıyor...</div>';
+  try{
+    const txt=await callText(`Öğrencinin 2026 KPSS ÖABT Okul Öncesi Öğretmenliği sınavında 50/50 net hedefi var ve sınava kısa süre kaldı (50 soru, 75 dakika, 4 yanlış 1 doğruyu götürür).
+
+ÖABT Okul Öncesi konu dağılımı ve ağırlıkları:
+Gelişim 8 (Piaget, Erikson, Kohlberg, Vygotsky, Freud, bağlanma) · Oyun 4 (Parten, Piaget) · Temeller-Program-Yaklaşımlar 4 (MEB programı, Montessori, Reggio, HighScope, Waldorf) · Öğrenme Kuramları 4 (Skinner, Pavlov, Bandura) · Okula Uyum ve Erken Okuryazarlık 4 · Çocuk Ruh Sağlığı 4 · Fen 3 (bilimsel süreç becerileri) · Matematik 3 · Çocuk Sağlığı ve İlkyardım 3 · Anne-Baba Eğitimi ve Aile Katılımı 3 · Güzel Sanatlar 2 (Lowenfeld) · Müzik 2 (Orff, Kodály, Dalcroze) · Drama 2 · Erken Çocukluk Edebiyatı 2 · Çocuk Hakları 2.
+
+Bu dağılımın tamamını kapsayan, gün gün kısa bir 14 günlük tekrar programı hazırla. Hangi güne hangi konu — ağırlığı yüksek konuları (özellikle Gelişim) öne al. Net artırma taktikleri ver. Sınav günü 75 dakikayı nasıl böleceğini ve ne zaman boş bırakacağını da anlat. Sonunda çok gaz veren bir motivasyon konuşması yap.`, HOCA_PERSONA);
+    box.innerHTML=`<div class="flex items-center justify-between mb-2 border-b-2 border-orange-200 pb-2">
+      <h4 class="m-0 text-orange-700 text-lg"><i class="fas fa-rocket text-yellow-500 mr-2"></i> AI Eylem Planı</h4>
+      <button onclick="document.getElementById('fourteen-day-plan').style.display='none';" class="text-red-500 font-bold px-2 py-1 bg-red-50 rounded text-xs">Kapat</button></div>${txt}`;
+  }catch(e){ box.innerHTML='<i class="fas fa-exclamation-triangle text-red-500"></i> '+netHatasi(e); }
+}
+function handleRestartQuiz(){
+  const m=lastQuizMode||{type:'exam'};
+  if(m.type==='static') startStaticQuiz(m.ref==='exam80'?EXAM_50:PREDICT_2026, m.name, m.timed);
+  else if(m.type==='topic') startTopicQuiz(m.topic,m.ders);
+  else if(m.type==='trap') generateTrapTest(m.topic,m.ders);
+  else if(m.type==='mistake') startMistakeQuiz();
+  else generateAIExam();
+}
+
+// ==================== BAŞLAT ====================
+window.onload=()=>{
+  loadSettings(); ringLoad(); loadRPM(); updateStatusDot(); populateModels(); loadMistakes(); initTopics();
+  document.getElementById('tahmin-count').innerText=PREDICT_2026.length+' soru · süresiz';
+  document.getElementById('kesin-count').innerText=EXAM_50.length+' soru · 110 dakika · ÖSYM dağılımı';
+  document.getElementById('settings-modal').addEventListener('click', e=>{ if(e.target.id==='settings-modal') closeSettings(); });
+};
+</script>
+</body>
+</html>
